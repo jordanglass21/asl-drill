@@ -136,9 +136,9 @@
     [
       {
         "score": 0.93,
-        "index": 1,
-        "categoryName": "Right",
-        "displayName": "Right"
+        "index": 0,
+        "categoryName": "Left",
+        "displayName": "Left"
       }
     ]
   ],
@@ -146,9 +146,9 @@
     [
       {
         "score": 0.93,
-        "index": 1,
-        "categoryName": "Right",
-        "displayName": "Right"
+        "index": 0,
+        "categoryName": "Left",
+        "displayName": "Left"
       }
     ]
   ]

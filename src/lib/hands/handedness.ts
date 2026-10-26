@@ -26,14 +26,15 @@ export interface DetectedHand {
 }
 
 /**
- * MediaPipe labels handedness as if the input image were mirrored (a selfie
- * view). We feed it raw, un-mirrored camera frames, so its labels are swapped
- * relative to the signer's physical hands.
+ * Maps MediaPipe's handedness label to the signer's physical hand. On the raw,
+ * un-mirrored camera frames we pass in, MediaPipe's labels already name the
+ * physical hand (confirmed with a real webcam), so no swap is needed. The
+ * preview is mirrored for display only.
  */
 export function labelToSide(categoryName: string): HandSide | null {
   const label = categoryName.toLowerCase();
-  if (label === "left") return "right";
-  if (label === "right") return "left";
+  if (label === "left") return "left";
+  if (label === "right") return "right";
   return null;
 }
 
