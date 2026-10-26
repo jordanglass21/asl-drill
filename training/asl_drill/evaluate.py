@@ -42,9 +42,13 @@ def evaluate(y_true: np.ndarray, proba: np.ndarray, labels: Sequence[str], top_c
     return Evaluation(labels, float((pred == y_true).mean()), per_letter, support, confusions, thresholds)
 
 
-def pick_threshold(evaluation: Evaluation, target_accuracy: float = 0.95, fallback: float = 0.8) -> float:
-    """The lowest listed threshold whose accepted predictions reach the target accuracy."""
+def pick_threshold(
+    evaluation: Evaluation, target_accuracy: float = 0.95, fallback: float = 0.8, floor: float = 0.6
+) -> float:
+    """The lowest listed threshold, at or above `floor`, whose accepted
+    predictions reach the target accuracy. The floor keeps the game from
+    confirming low-confidence readings, even when held-out numbers allow it."""
     for threshold, coverage, accuracy in evaluation.thresholds:
-        if threshold > 0 and coverage > 0 and accuracy >= target_accuracy:
+        if threshold > 0 and threshold >= floor and coverage > 0 and accuracy >= target_accuracy:
             return threshold
     return fallback

@@ -1,6 +1,6 @@
 // The TypeScript half of the classifier parity check; the Python half is
 // training/tests/test_classifier_parity.py. Both read the same fixture.
-import shippedModel from "../../../public/models/letters-v1.json";
+import shippedModel from "../../../public/models/letters-v2.json";
 import parity from "../../../fixtures/classifier/parity.json";
 import { ModelError, parseModel, predictProbabilities, topLetter, type ExportedModel } from "./model";
 

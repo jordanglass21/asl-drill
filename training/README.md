@@ -33,15 +33,15 @@ decides per sample whether a hand is mirrored), cross-validates by take, and
 compares ours-only against ours + asl-now on your held-out takes. The combined
 data ships only if it doesn't lower held-out accuracy. It writes:
 
-- `public/models/letters-v1.json`: the model the app loads
-- `training/reports/letters-v1.md`: per-letter accuracy, confused pairs, thresholds
-- `training/reports/letters-v1-orientation.html`: skeletons to eyeball orientation
+- `public/models/letters-v2.json`: the model the app loads
+- `training/reports/letters-v2.md`: per-letter accuracy, confused pairs, thresholds
+- `training/reports/letters-v2-orientation.html`: skeletons to eyeball orientation
 - `fixtures/classifier/parity.json`: inputs and expected probabilities that the
   TypeScript classifier must reproduce
 
-When replacing the shipped model with an incompatible one, write it as
-`letters-v2.json` and update `LETTER_MODEL_PATH`, since model files are cached
-as immutable.
+Every retrain that ships needs a new name (next: `letters-v3`): bump it in
+`scripts/train_letters.py`, `scripts/make_classifier_fixtures.py`, and
+`LETTER_MODEL_PATH`, since model files are cached as immutable for a year.
 
 ## Normalization
 

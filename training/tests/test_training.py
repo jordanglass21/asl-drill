@@ -71,6 +71,8 @@ def test_evaluate_reports_accuracy_confusions_and_coverage():
     by_threshold = {t: (c, a) for t, c, a in ev.thresholds}
     assert by_threshold[0.8] == (0.5, 1.0)
     assert pick_threshold(ev, target_accuracy=1.0) == 0.7
+    assert pick_threshold(ev, target_accuracy=0.5) == 0.6  # 0.5 qualifies, but the floor is 0.6
+    assert pick_threshold(ev, target_accuracy=0.5, floor=0.0) == 0.5
 
 
 def test_export_round_trip_matches_scikit_learn():
