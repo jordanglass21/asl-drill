@@ -6,6 +6,7 @@
     {
       "id": "sample-b",
       "letter": "B",
+      "kind": "letter",
       "startedAt": "2026-10-26T18:00:00.000Z",
       "handednessSetting": "auto",
       "camera": {
@@ -898,6 +899,7 @@
     {
       "id": "sample-k",
       "letter": "K",
+      "kind": "letter",
       "startedAt": "2026-10-26T18:00:00.000Z",
       "handednessSetting": "auto",
       "camera": {
