@@ -1,0 +1,112 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { readHand } from "@/lib/classifier/live";
+import type { LetterModel } from "@/lib/classifier/model";
+import { initialPracticeState, practiceReducer, type PracticeEvent, type PracticeState } from "@/lib/practice/session";
+import { saveSession } from "@/lib/practice/storage";
+import { boardView } from "@/lib/practice/view";
+import { pickWords, playableWords } from "@/lib/practice/words";
+import type { TrackedFrame } from "./useHandTracking";
+
+export const WORDS_PER_SESSION = 10;
+const TICK_MS = 100;
+
+const reducer = (state: PracticeState, event: PracticeEvent) => practiceReducer(state, event);
+
+function localStorageOrUndefined(): Storage | undefined {
+  try {
+    return window.localStorage;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Runs a practice session: feeds each tracked frame's reading to the session
+ * reducer, ticks the clock, handles keys (enter start, esc skip letter, tab
+ * new word), and saves the session then opens its results when it ends.
+ */
+export function usePractice({ model, canStart }: { model: LetterModel | null; canStart: () => boolean }) {
+  const router = useRouter();
+  const [state, dispatch] = useReducer(reducer, initialPracticeState);
+  const [now, setNow] = useState(0);
+  const modelRef = useRef(model);
+  const playingRef = useRef(false);
+  const playing = state.phase === "playing";
+
+  useEffect(() => {
+    modelRef.current = model;
+  }, [model]);
+  useEffect(() => {
+    playingRef.current = playing;
+  }, [playing]);
+
+  const onFrame = useCallback((frame: TrackedFrame) => {
+    const loaded = modelRef.current;
+    if (!playingRef.current || !loaded) return;
+    const reading = frame.hand ? readHand(loaded, frame.hand, frame.width, frame.height) : null;
+    dispatch({ type: "reading", now: frame.now, letter: reading?.letter ?? null, hand: frame.hand !== null });
+  }, []);
+
+  const start = useCallback(() => {
+    if (!canStart()) return;
+    dispatch({
+      type: "start",
+      now: performance.now(),
+      id: crypto.randomUUID(),
+      startedAt: new Date().toISOString(),
+      words: pickWords(playableWords(), WORDS_PER_SESSION),
+    });
+  }, [canStart]);
+
+  const skipLetter = useCallback(() => dispatch({ type: "skipLetter", now: performance.now() }), []);
+
+  const wordsRef = useRef<string[]>([]);
+  useEffect(() => {
+    wordsRef.current = state.phase === "playing" ? state.words : [];
+  }, [state]);
+  const newWord = useCallback(() => {
+    const [word] = pickWords(playableWords(), 1, Math.random, wordsRef.current);
+    if (word) dispatch({ type: "replaceWord", now: performance.now(), word });
+  }, []);
+
+  // Clock: drives timeouts, pauses, and the pause between words.
+  useEffect(() => {
+    if (!playing) return;
+    const id = setInterval(() => {
+      const t = performance.now();
+      setNow(t);
+      dispatch({ type: "tick", now: t, hidden: document.visibilityState === "hidden", isoNow: new Date().toISOString() });
+    }, TICK_MS);
+    return () => clearInterval(id);
+  }, [playing]);
+
+  // Save and show results when the session ends.
+  useEffect(() => {
+    if (state.phase !== "done") return;
+    saveSession(localStorageOrUndefined(), state.record);
+    router.push(`/results?id=${encodeURIComponent(state.record.id)}`);
+  }, [state, router]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      if (event.target instanceof HTMLElement && event.target.closest("input, textarea, select, [role=radiogroup]")) return;
+      if (event.key === "Enter" && !playingRef.current) {
+        event.preventDefault();
+        start();
+      } else if (event.key === "Escape" && playingRef.current) {
+        skipLetter();
+      } else if (event.key === "Tab" && playingRef.current) {
+        event.preventDefault();
+        newWord();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [start, skipLetter, newWord]);
+
+  return { phase: state.phase, view: boardView(state, now), onFrame, start, skipLetter, newWord };
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useHandCamera } from "@/hooks/useHandCamera";
 import { useHandednessSetting } from "@/hooks/useHandednessSetting";
 import { useLetterReading } from "@/hooks/useLetterReading";
@@ -45,7 +46,11 @@ export function CameraCheck() {
         />
         <ReadingPanel status={letters.status} reading={reading} threshold={letters.threshold} />
       </div>
-      <KeyHints hints={[{ text: "Hold up a handshape to read it" }, { text: "Readings aren't saved" }]} />
+      <KeyHints hints={[{ text: "Hold up a handshape to read it" }, { text: "Readings aren't saved" }]}>
+        <Link href="/record" className="label !text-[11px] hover:!text-amber">
+          Record training samples →
+        </Link>
+      </KeyHints>
     </>
   );
 }

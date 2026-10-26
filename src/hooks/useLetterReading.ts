@@ -59,6 +59,7 @@ export function useLetterReading() {
     status: failed ? "error" : model ? "ready" : "loading",
     reading,
     threshold: model?.threshold ?? null,
+    model,
     onFrame,
   } as const;
 }

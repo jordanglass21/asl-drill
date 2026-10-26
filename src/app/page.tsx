@@ -1,10 +1,9 @@
-import { CameraCheck } from "@/components/CameraCheck";
+import { Landing } from "@/components/landing/Landing";
 
 export default function Home() {
   return (
     <main className="flex flex-1 flex-col gap-3.5">
-      <h1 className="sr-only">Camera check</h1>
-      <CameraCheck />
+      <Landing />
     </main>
   );
 }
