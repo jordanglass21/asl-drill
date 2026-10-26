@@ -1,6 +1,6 @@
 ---
 name: ship
-description: Commit, push, PR, watch CI, merge to main, clean up worktree/branches, pull, watch deploy
+description: Commit, push, PR, watch CI, merge to main, delete the remote branch, pull, watch deploy
 ---
 
 Ship the current work end-to-end. Run these steps in order and STOP if any step fails or reveals something unexpected — report and wait, don't paper over it.
@@ -26,16 +26,18 @@ An optional PR title / commit summary may be passed as arguments: $ARGUMENTS
 - If any required check fails, STOP, show the failing output, and wait — do not merge.
 
 ## 5. Merge + clean up
-- Only once checks are green: squash-merge (`gh pr merge --squash`), matching how this repo merges.
+- Only once checks are green: squash-merge (`gh pr merge --squash --delete-branch`), matching how this repo merges. This deletes the remote branch.
 - NOTE: from a worktree `gh pr merge` may error locally ("main is already used by worktree") even though the REMOTE merge succeeded. If that happens, verify the PR is actually merged (`gh pr view --json state,mergedAt`) before treating it as a failure.
-- Delete the remote branch and the local branch.
-- Remove the worktree for this work (`git worktree remove`) and prune (`git worktree prune`).
+- Leave the local worktree and branch alone; the workspace tool (e.g. Superset) owns their lifecycle.
 
 ## 6. Pull main to local
 - In the primary checkout, fast-forward `main` to the merged remote (`git fetch origin` + `git pull --ff-only origin main`), so local matches remote.
 
 ## 7. Watch the deploy
-- Find and watch the deploy triggered by the merge (e.g. `gh run watch` on the deploy workflow run for the merge commit).
+- Find the deploy triggered by the merge commit and watch it until it settles:
+  - Deploy workflow in GitHub Actions: `gh run watch` on that workflow's run for the merge commit.
+  - Platform GitHub integration (e.g. Vercel): poll the commit status on the merge commit (`gh api repos/{owner}/{repo}/commits/{sha}/status`) until the deploy context is `success` or `failure`.
+- If the project has a known production URL, request it and confirm it responds.
 - Report the final deploy status. If it fails, surface the logs.
 
 At the end, give a one-line summary: PR link, merge status, deploy status.
