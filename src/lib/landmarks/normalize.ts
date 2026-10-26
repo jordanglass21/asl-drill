@@ -3,6 +3,8 @@
 
 import type { HandSide, Landmark } from "@/lib/hands/handedness";
 
+/** Bump (in both languages) whenever the output changes; models record it. */
+export const NORMALIZATION_VERSION = 1;
 export const LANDMARK_COUNT = 21;
 export const FEATURE_COUNT = LANDMARK_COUNT * 3;
 const WRIST = 0;

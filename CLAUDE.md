@@ -33,11 +33,11 @@ This project may run with permission prompts disabled. So:
 ## Testing
 
 - Jest unit tests for all core logic. Every feature ships with tests.
-- Normalization is tested against shared fixtures in both TypeScript and Python, so training and the app never drift apart.
+- Normalization and classifier inference are tested against shared fixtures in both TypeScript and Python, so training and the app never drift apart.
 - Do not try to test MediaPipe or the camera directly. Test the code that consumes their output, using recorded landmark fixtures.
 
 ## Training (`/training`)
 
-- Python code for preparing data, training the classifier, and exporting it to TensorFlow.js.
+- Python code for preparing data, training the classifier (scikit-learn), and exporting it as a JSON model that the app runs in plain TypeScript.
 - Raw datasets live in `/training/data/` and are gitignored. The exported model used by the app is committed.
 - Training output should report per-letter accuracy and the most-confused letter pairs.

@@ -20,6 +20,11 @@ const nextConfig: NextConfig = {
         source: "/mediapipe/:path*",
         headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
       },
+      {
+        // Model files are versioned by name (see src/lib/classifier/live.ts).
+        source: "/models/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
     ];
   },
 };

@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // MediaPipe Wasm runtime copied from node_modules.
     "public/mediapipe/**",
+    // Python training code and its virtualenv.
+    "training/**",
   ]),
 ]);
 
