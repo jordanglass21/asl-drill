@@ -42,10 +42,8 @@ function loadHandLandmarker(): Promise<HandLandmarker> {
 
 function readOverlayColors(element: Element): OverlayColors {
   const style = getComputedStyle(element);
-  return {
-    signing: style.getPropertyValue("--accent").trim() || "#e2b714",
-    other: style.getPropertyValue("--muted").trim() || "#646669",
-  };
+  const read = (name: string, fallback: string) => style.getPropertyValue(name).trim() || fallback;
+  return { bone: read("--amber", "#f4a51c"), joint: read("--cream", "#efe5cf"), dim: read("--cream-dim", "#6e675c") };
 }
 
 export interface HandTrackingState {

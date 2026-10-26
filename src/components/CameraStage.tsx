@@ -2,7 +2,7 @@
 
 import type { ReactNode, RefObject } from "react";
 import type { HandTrackingState } from "@/hooks/useHandTracking";
-import { CAMERA_ERROR_MESSAGES, type CameraState } from "@/lib/camera/status";
+import { CAMERA_ERROR_MESSAGES, CAMERA_STATUS_MESSAGES, type CameraState } from "@/lib/camera/status";
 import { CameraMessage } from "./CameraMessage";
 
 interface Props {
@@ -11,34 +11,28 @@ interface Props {
   videoRef: RefObject<HTMLVideoElement | null>;
   canvasRef: RefObject<HTMLCanvasElement | null>;
   onStart: () => void;
+  /** Short status shown in the panel's corner, e.g. "right hand". */
+  tag?: string;
   /** Rendered over the live preview (e.g. a countdown). */
   children?: ReactNode;
 }
 
 /** Mirrored camera preview with the landmark overlay and permission messages. */
-export function CameraStage({ cameraState, tracking, videoRef, canvasRef, onStart, children }: Props) {
+export function CameraStage({ cameraState, tracking, videoRef, canvasRef, onStart, tag, children }: Props) {
   const ready = cameraState.status === "ready";
   const message =
     cameraState.status === "idle"
-      ? {
-          title: "Turn on your camera to start",
-          detail: "Hand tracking runs entirely in your browser. Video never leaves your device.",
-          action: { label: "enable camera", onClick: onStart },
-        }
+      ? { ...CAMERA_STATUS_MESSAGES.idle, action: { label: "Enable camera", onClick: onStart } }
       : cameraState.status === "requesting"
-        ? { title: "Waiting for camera permission…", detail: "Allow camera access in your browser's prompt." }
+        ? CAMERA_STATUS_MESSAGES.requesting
         : cameraState.status === "error"
-          ? { ...CAMERA_ERROR_MESSAGES[cameraState.reason], action: { label: "try again", onClick: onStart } }
+          ? { ...CAMERA_ERROR_MESSAGES[cameraState.reason], action: { label: "Try again", onClick: onStart } }
           : tracking.status === "error"
-            ? {
-                title: "Couldn't load hand tracking",
-                detail: "Check your connection, then try again.",
-                action: { label: "try again", onClick: tracking.retry },
-              }
+            ? { ...CAMERA_STATUS_MESSAGES.trackingFailed, action: { label: "Try again", onClick: tracking.retry } }
             : null;
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-surface">
+    <div className="relative aspect-video max-h-[calc(100vh-300px)] min-h-[260px] w-full overflow-hidden rounded bg-panel">
       <video
         ref={videoRef}
         autoPlay
@@ -52,14 +46,12 @@ export function CameraStage({ cameraState, tracking, videoRef, canvasRef, onStar
         aria-hidden
         className={`pointer-events-none absolute inset-0 h-full w-full object-cover ${ready ? "" : "invisible"}`}
       />
-      {message ? (
-        <div className="absolute inset-0 bg-surface/95">
-          <CameraMessage {...message} />
-        </div>
-      ) : (
-        children
+      {ready && (
+        <p className="label pointer-events-none absolute top-2.5 left-3">
+          Camera{tag && <> · <b className="font-medium text-amber">{tag}</b></>}
+        </p>
       )}
+      {message ? <div className="absolute inset-0 bg-panel">{<CameraMessage {...message} />}</div> : children}
     </div>
   );
 }
-

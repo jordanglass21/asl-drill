@@ -1,11 +1,20 @@
 import type { Metadata } from "next";
-import { Geist_Mono } from "next/font/google";
+import { Big_Shoulders, IBM_Plex_Mono } from "next/font/google";
+import { SiteHeader } from "@/components/SiteHeader";
 import { pageTitle } from "@/lib/site";
 import "./globals.css";
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// Big Shoulders is variable with an optical-size axis; large sizes get its display cut.
+const bigShoulders = Big_Shoulders({
+  variable: "--font-big-shoulders",
   subsets: ["latin"],
+  axes: ["opsz"],
+});
+
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
+  subsets: ["latin"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
@@ -15,8 +24,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en" className={`${bigShoulders.variable} ${plexMono.variable} h-full antialiased`}>
+      <body className="flex min-h-full flex-col items-center px-4 pt-4 sm:px-6">
+        <div className="flex w-full max-w-[1040px] flex-1 flex-col gap-3.5">
+          <SiteHeader />
+          {children}
+        </div>
+      </body>
     </html>
   );
 }

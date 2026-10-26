@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ASL Drill · practice mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders:opsz,wght@10..72,800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Board */
+    --board: #0c0b0a;        /* near-black, slightly warm */
+    --rail: #151412;         /* panels and rails behind flaps */
+    --flap: #1d1b18;         /* charcoal flap face */
+    --flap-top: #211f1b;     /* top half, a touch lighter (lit from above) */
+    --split: #050504;        /* the horizontal split line */
+    --edge: #2a2723;         /* hairline highlight under the split */
+    /* Type */
+    --cream: #efe5cf;        /* current letter, primary text */
+    --cream-dim: #6e675c;    /* pending letters */
+    --label: #8b8274;        /* small-caps labels */
+    /* Accent */
+    --amber: #f4a51c;        /* confirmed letters, highlights, hand lines */
+    --amber-dim: #7a5512;    /* amber at rest (progress tracks) */
+    /* Proposed, open question: missed letters */
+    --miss: #c8604a;
+
+    --display: "Big Shoulders", "Arial Narrow", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--board); color: var(--cream); }
+  body { font-family: var(--mono); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 16px 24px 0; }
+  .wrap { width: 100%; max-width: 1040px; flex: 1; display: flex; flex-direction: column; gap: 14px; }
+
+  /* Top bar */
+  header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--rail); padding-bottom: 10px; }
+  .brand { font-family: var(--display); font-weight: 800; font-size: 22px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .brand span { color: var(--amber); }
+  nav { display: flex; gap: 22px; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--label); }
+  nav .on { color: var(--cream); }
+
+  /* Departures-board stats row */
+  .departures { display: grid; grid-template-columns: 2.2fr 1fr 1fr 1fr 1fr; background: var(--rail); border-radius: 4px; overflow: hidden; }
+  .departures div { padding: 7px 14px; border-right: 1px solid var(--board); }
+  .departures div:last-child { border-right: 0; }
+  .departures dt { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--label); margin-bottom: 4px; }
+  .departures dd { margin: 0; font-size: 18px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .departures dd.amber { color: var(--amber); }
+  .departures dd small { font-size: 12px; color: var(--label); margin-left: 4px; }
+
+  /* The board: one flap per letter */
+  .board { display: flex; justify-content: center; gap: 8px; padding: 6px 0 10px; }
+  .flap {
+    --w: 86px; --h: 122px;
+    position: relative; width: var(--w); height: var(--h); perspective: 520px;
+    font-family: var(--display); font-weight: 800; font-size: 106px; line-height: var(--h); text-align: center;
+    color: var(--cream-dim);
+  }
+  .half {
+    position: absolute; left: 0; right: 0; height: 50%; overflow: hidden;
+    background: var(--flap); backface-visibility: hidden;
+  }
+  .half span { display: block; height: var(--h); }
+  .half.top { top: 0; border-radius: 6px 6px 0 0; background: var(--flap-top); }
+  .half.bottom { bottom: 0; border-radius: 0 0 6px 6px; }
+  .half.bottom span { transform: translateY(-50%); }
+  /* split line: dark gap with a hairline highlight beneath, plus side pins */
+  .flap::after {
+    content: ""; position: absolute; left: 0; right: 0; top: calc(50% - 1px); height: 2px;
+    background: var(--split); box-shadow: 0 1px 0 var(--edge); z-index: 5;
+  }
+  .flap::before {
+    content: ""; position: absolute; top: calc(50% - 5px); left: -3px; right: -3px; height: 10px; z-index: 6;
+    background: linear-gradient(var(--split), var(--split)) left / 4px 100% no-repeat,
+                linear-gradient(var(--split), var(--split)) right / 4px 100% no-repeat;
+    border-radius: 2px;
+  }
+  .flap.current { color: var(--cream); }
+  .flap.current .half { background: #24221e; }
+  .flap.current .half.top { background: #282521; }
+  .flap.confirmed { color: var(--amber); }
+  .flap.missed { color: var(--miss); }
+  /* caret under the current flap */
+  .flap.current .caret { position: absolute; left: 22%; right: 22%; bottom: -9px; height: 3px; background: var(--cream); border-radius: 2px; }
+
+  /* Flip: the old top half falls forward, then the new bottom half lands. */
+  .leaf { position: absolute; left: 0; right: 0; height: 50%; overflow: hidden; backface-visibility: hidden; z-index: 4; }
+  .leaf span { display: block; height: var(--h); }
+  .leaf.falling { top: 0; transform-origin: bottom; background: #282521; border-radius: 6px 6px 0 0; color: var(--cream);
+                  animation: fall 160ms cubic-bezier(.55,0,.9,.4) forwards; }
+  .leaf.landing { bottom: 0; transform-origin: top; background: var(--flap); border-radius: 0 0 6px 6px; color: var(--amber);
+                  transform: rotateX(90deg); animation: land 220ms 150ms cubic-bezier(.2,.9,.3,1.25) forwards; }
+  .leaf.landing span { transform: translateY(-50%); }
+  @keyframes fall { to { transform: rotateX(-90deg); filter: brightness(.6); } }
+  @keyframes land { to { transform: rotateX(0deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .leaf { display: none; }
+    .flap.confirmed.just { animation: fade 200ms ease-out; }
+    @keyframes fade { from { opacity: .3; } to { opacity: 1; } }
+  }
+
+  .hint { text-align: center; font-size: 11px; margin: 0; letter-spacing: 0.12em; text-transform: uppercase; color: var(--label); }
+  .hint kbd { font-family: var(--mono); color: var(--cream); border: 1px solid var(--edge); border-radius: 3px; padding: 1px 6px; margin: 0 2px; }
+
+  /* Camera panel */
+  .stage { display: grid; grid-template-columns: 1fr 200px; gap: 10px; }
+  .camera { position: relative; aspect-ratio: 16 / 9; max-height: calc(100vh - 390px); width: 100%; justify-self: center; background: #11100e; border-radius: 4px; overflow: hidden; }
+  .camera .grain { position: absolute; inset: 0; background: radial-gradient(ellipse at 55% 60%, #1f1c18 0%, #0e0d0c 70%); }
+  .camera svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .camera .tag { position: absolute; left: 12px; top: 10px; font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--label); }
+  .camera .tag b { color: var(--amber); font-weight: 500; }
+  .reading { align-self: start; background: var(--rail); border-radius: 4px; padding: 12px 14px; display: flex; flex-direction: column; gap: 12px; }
+  .reading dt { font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--label); }
+  .reading .letter { font-family: var(--display); font-weight: 800; font-size: 72px; line-height: .9; color: var(--cream); }
+  .meter { height: 4px; background: var(--amber-dim); border-radius: 2px; overflow: hidden; }
+  .meter i { display: block; height: 100%; width: 72%; background: var(--amber); }
+  .meter-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--label); font-variant-numeric: tabular-nums; }
+
+  footer { position: sticky; bottom: 0; margin-top: auto; padding: 10px 0 12px; border-top: 1px solid var(--rail); background: var(--board); display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .controls { display: flex; gap: 8px; }
+  button { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; background: var(--rail); color: var(--cream); border: 1px solid var(--edge); border-radius: 3px; padding: 5px 10px; cursor: pointer; }
+  button:hover { color: var(--amber); }
+  .note { font-size: 12px; color: var(--label); max-width: 70ch; margin: 0 auto; text-align: center; }
+  .note b { color: var(--miss); font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">ASL <span>Drill</span></div>
+    <nav><span class="on">Practice</span><span>Camera</span><span>Results</span><span>Settings</span></nav>
+  </header>
+
+  <dl class="departures">
+    <div><dt>Word</dt><dd>PLANET <small>4 / 10</small></dd></div>
+    <div><dt>Letters / min</dt><dd class="amber">18.4</dd></div>
+    <div><dt>Accuracy</dt><dd>94<small>%</small></dd></div>
+    <div><dt>Streak</dt><dd class="amber">7</dd></div>
+    <div><dt>Time</dt><dd>01:42</dd></div>
+  </dl>
+
+  <div class="board" id="board" aria-label="Target word"></div>
+
+  <div class="stage">
+    <div class="camera">
+      <div class="grain"></div>
+      <span class="tag">Camera · <b>right hand</b></span>
+      <svg viewBox="0 0 640 360" aria-hidden="true">
+        <g id="hand"></g>
+      </svg>
+    </div>
+    <dl class="reading">
+      <div><dt>Reading</dt><div class="letter">A</div></div>
+      <div>
+        <div class="meter"><i></i></div>
+        <div class="meter-label"><span>hold</span><span>72%</span></div>
+      </div>
+      <div><dt>Next</dt><div style="font-size:14px;margin-top:4px">N · E · T</div></div>
+    </dl>
+  </div>
+
+  <footer>
+    <p class="hint">Hold the handshape to confirm &nbsp;·&nbsp; <kbd>esc</kbd> skip letter &nbsp;·&nbsp; <kbd>tab</kbd> new word</p>
+    <div class="controls" title="Mockup only">
+      <button id="flip">Replay flip</button>
+      <button id="miss">Show a miss</button>
+    </div>
+  </footer>
+</div>
+
+<script>
+  const WORD = "PLANET";
+  const board = document.getElementById("board");
+  const state = ["confirmed", "confirmed", "current", "pending", "pending", "pending"];
+
+  function flap(ch, cls) {
+    const el = document.createElement("div");
+    el.className = "flap " + cls;
+    el.innerHTML = `<div class="half top"><span>${ch}</span></div><div class="half bottom"><span>${ch}</span></div>` +
+      (cls === "current" ? '<i class="caret"></i>' : "");
+    return el;
+  }
+  function render() {
+    board.replaceChildren(...WORD.split("").map((c, i) => flap(c, state[i])));
+  }
+  render();
+
+  function confirm(index, outcome) {
+    const old = board.children[index];
+    const ch = WORD[index];
+    const next = flap(ch, outcome + " just");
+    const falling = document.createElement("div");
+    falling.className = "leaf falling"; falling.innerHTML = `<span>${ch}</span>`;
+    const landing = document.createElement("div");
+    landing.className = "leaf landing"; landing.innerHTML = `<span>${ch}</span>`;
+    if (outcome === "missed") landing.style.color = "var(--miss)";
+    // during the flip the static bottom still shows the old face; the top already shows the new one
+    next.querySelector(".half.bottom").style.color = "var(--cream)";
+    next.append(falling, landing);
+    board.replaceChild(next, old);
+    setTimeout(() => {
+      next.querySelector(".half.bottom").style.color = "";
+      falling.remove(); landing.remove();
+      next.classList.remove("just");
+    }, 420);
+  }
+
+  document.getElementById("flip").onclick = () => { state.splice(2, 2, "current", "pending"); render(); setTimeout(() => confirm(2, "confirmed"), 250); setTimeout(() => { board.children[3].replaceWith(flap(WORD[3], "current")); }, 700); };
+  document.getElementById("miss").onclick = () => { state.splice(2, 2, "current", "pending"); render(); setTimeout(() => confirm(2, "missed"), 250); };
+
+  // A hand skeleton in the restyled overlay: thin amber bones, cream joints.
+  const pts = [[330,300],[290,282],[262,252],[248,222],[240,196],[296,214],[290,170],[288,140],[286,114],[322,208],[322,160],[322,126],[322,98],[348,212],[352,168],[354,136],[355,110],[372,222],[382,190],[388,168],[392,148]];
+  const bones = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[9,10],[10,11],[11,12],[13,14],[14,15],[15,16],[0,17],[17,18],[18,19],[19,20],[5,9],[9,13],[13,17]];
+  const g = document.getElementById("hand");
+  g.innerHTML = bones.map(([a,b]) => `<line x1="${pts[a][0]}" y1="${pts[a][1]}" x2="${pts[b][0]}" y2="${pts[b][1]}" stroke="#f4a51c" stroke-width="1.6" stroke-linecap="round" opacity=".9"/>`).join("") +
+    pts.map(([x,y], i) => `<circle cx="${x}" cy="${y}" r="${i===0?4:2.8}" fill="#efe5cf"/>`).join("");
+</script>
+</body>
+</html>

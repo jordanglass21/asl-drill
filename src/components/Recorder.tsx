@@ -7,6 +7,10 @@ import { trackingReadout } from "@/lib/hands/readout";
 import { phaseOverlay } from "@/lib/recording/display";
 import { countByLetter, LETTERS } from "@/lib/recording/recorder";
 import { CameraStage } from "./CameraStage";
+import { BoardButton } from "./board/BoardButton";
+import { Departures } from "./board/Departures";
+import { Flap } from "./board/Flap";
+import { KeyHints } from "./board/KeyHints";
 import { HandednessToggle } from "./HandednessToggle";
 
 export function Recorder() {
@@ -22,72 +26,74 @@ export function Recorder() {
   const totalFrames = state.takes.reduce((sum, take) => sum + take.frames.length, 0);
 
   return (
-    <section className="flex w-full max-w-4xl flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <HandednessToggle value={handedness} onChange={setHandedness} />
-        <p aria-live="polite" className="text-sm text-muted">
-          {trackingReadout(tracking, handedness)}
-        </p>
+    <>
+      <Departures
+        items={[
+          { label: "Signing hand", value: <HandednessToggle value={handedness} onChange={setHandedness} />, span: 1.6 },
+          { label: "Letter", value: state.letter ?? "—", highlight: Boolean(state.letter) },
+          { label: "Takes", value: state.takes.length },
+          { label: "Frames", value: totalFrames },
+          { label: "Export", value: state.unsaved ? "pending" : state.takes.length ? "saved" : "—", highlight: state.unsaved },
+        ]}
+      />
+
+      <div className="grid gap-2.5 sm:grid-cols-[1fr_200px]">
+        <CameraStage
+          cameraState={cameraState}
+          tracking={tracking}
+          videoRef={videoRef}
+          canvasRef={canvasRef}
+          onStart={startCamera}
+          tag={trackingReadout(tracking, handedness)}
+        >
+          {overlay && (
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3 bg-board/45">
+              <Flap char={overlay.label === "●" ? (state.letter ?? "") : overlay.label} state="current" />
+              <p className="label !text-cream">{overlay.detail}</p>
+            </div>
+          )}
+        </CameraStage>
+
+        <aside className="flex flex-col gap-3 self-start rounded bg-rail p-3.5">
+          <p className="label">Status</p>
+          <p aria-live="polite" className="text-xs leading-relaxed text-cream">
+            {state.notice ?? (state.letter ? `Press space to record ${state.letter}.` : "Type a letter to choose it.")}
+          </p>
+          <BoardButton onClick={recorder.exportTakes} disabled={state.takes.length === 0}>
+            Export JSON
+          </BoardButton>
+        </aside>
       </div>
 
-      <CameraStage
-        cameraState={cameraState}
-        tracking={tracking}
-        videoRef={videoRef}
-        canvasRef={canvasRef}
-        onStart={startCamera}
-      >
-        {overlay && (
-          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center bg-background/40">
-            <p className="text-7xl text-accent">{overlay.label}</p>
-            <p className="text-sm text-foreground">{overlay.detail}</p>
-          </div>
-        )}
-      </CameraStage>
-
-      <div role="group" aria-label="Letter" className="grid grid-cols-9 gap-1 sm:grid-cols-13">
+      <div role="group" aria-label="Letter" className="flex flex-wrap justify-center gap-x-1.5 gap-y-2">
         {LETTERS.map((letter) => {
+          const count = counts[letter]?.takes ?? 0;
           const selected = letter === state.letter;
-          const count = counts[letter];
           return (
             <button
               key={letter}
               type="button"
               aria-pressed={selected}
+              aria-label={`${letter}, ${count} takes`}
               onClick={() => recorder.selectLetter(letter)}
-              className={`flex flex-col items-center rounded py-1 transition-colors focus-visible:outline-2 focus-visible:outline-accent ${
-                selected ? "bg-surface text-accent" : "text-foreground hover:bg-surface"
-              }`}
+              className="flex flex-col items-center gap-1 rounded focus-visible:outline-2 focus-visible:outline-amber"
             >
-              <span className="text-lg">{letter}</span>
-              <span className="text-xs text-muted">{count ? count.takes : "·"}</span>
+              <Flap char={letter} size="sm" state={selected ? "current" : count > 0 ? "confirmed" : "pending"} />
+              <span className="text-[10px] text-label tabular-nums">{count || "·"}</span>
             </button>
           );
         })}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-        <p aria-live="polite" className="text-muted">
-          {state.notice ?? (state.letter ? `press space to record ${state.letter}` : "type a letter to choose it")}
-        </p>
-        <div className="flex items-center gap-4">
-          <span className="text-muted">
-            {state.takes.length} takes · {totalFrames} frames
-          </span>
-          <button
-            type="button"
-            onClick={recorder.exportTakes}
-            disabled={state.takes.length === 0}
-            className="rounded bg-surface px-3 py-1 text-foreground transition-colors hover:text-accent disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-accent"
-          >
-            export json
-          </button>
-        </div>
-      </div>
-
-      <p className="text-xs text-muted">
-        letter keys choose · space records · esc cancels · backspace deletes last take · ⌘/ctrl+s exports
-      </p>
-    </section>
+      <KeyHints
+        hints={[
+          { keys: "a–z", text: "letter" },
+          { keys: "space", text: "record" },
+          { keys: "esc", text: "cancel" },
+          { keys: "⌫", text: "delete last" },
+          { keys: "⌘S", text: "export" },
+        ]}
+      />
+    </>
   );
 }

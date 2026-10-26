@@ -5,8 +5,10 @@ import { useHandednessSetting } from "@/hooks/useHandednessSetting";
 import { useLetterReading } from "@/hooks/useLetterReading";
 import { trackingReadout } from "@/lib/hands/readout";
 import { CameraStage } from "./CameraStage";
+import { Departures } from "./board/Departures";
+import { KeyHints } from "./board/KeyHints";
 import { HandednessToggle } from "./HandednessToggle";
-import { LetterReadout } from "./LetterReadout";
+import { ReadingPanel } from "./ReadingPanel";
 
 export function CameraCheck() {
   const [handedness, setHandedness] = useHandednessSetting();
@@ -15,27 +17,35 @@ export function CameraCheck() {
     setting: handedness,
     onFrame: letters.onFrame,
   });
+  const reading = letters.reading;
+  const tracked = tracking.status === "ready" && tracking.signingSide;
 
   return (
-    <section className="flex w-full max-w-4xl flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <HandednessToggle value={handedness} onChange={setHandedness} />
-        <p aria-live="polite" className="text-sm text-muted">
-          {trackingReadout(tracking, handedness)}
-        </p>
+    <>
+      <Departures
+        items={[
+          { label: "Signing hand", value: <HandednessToggle value={handedness} onChange={setHandedness} />, span: 1.6 },
+          { label: "Tracking", value: tracked ? `${tracking.signingSide}` : "—", highlight: Boolean(tracked) },
+          { label: "Reading", value: reading?.letter ?? "—", highlight: Boolean(reading?.letter) },
+          {
+            label: "Confidence",
+            value: reading ? Math.round(reading.confidence * 100) : "—",
+            unit: reading ? "%" : undefined,
+          },
+        ]}
+      />
+      <div className="grid gap-2.5 sm:grid-cols-[1fr_200px]">
+        <CameraStage
+          cameraState={cameraState}
+          tracking={tracking}
+          videoRef={videoRef}
+          canvasRef={canvasRef}
+          onStart={start}
+          tag={trackingReadout(tracking, handedness)}
+        />
+        <ReadingPanel status={letters.status} reading={reading} threshold={letters.threshold} />
       </div>
-      <CameraStage
-        cameraState={cameraState}
-        tracking={tracking}
-        videoRef={videoRef}
-        canvasRef={canvasRef}
-        onStart={start}
-      >
-        {tracking.status === "ready" && <LetterReadout status={letters.status} reading={letters.reading} />}
-      </CameraStage>
-      <p className="text-xs text-muted">
-        Static letters only (J and Z come later). Below the confidence threshold the best guess is shown in lowercase.
-      </p>
-    </section>
+      <KeyHints hints={[{ text: "Hold up a handshape to read it" }, { text: "Readings aren't saved" }]} />
+    </>
   );
 }

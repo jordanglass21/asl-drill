@@ -9,11 +9,8 @@ export const metadata: Metadata = {
 
 export default function RecordPage() {
   return (
-    <main className="flex flex-1 flex-col items-center gap-8 px-4 py-8">
-      <header className="flex w-full max-w-4xl items-baseline gap-3">
-        <h1 className="text-2xl text-accent">record</h1>
-        <p className="text-sm text-muted">capture labeled landmark samples for training</p>
-      </header>
+    <main className="flex flex-1 flex-col gap-3.5">
+      <h1 className="sr-only">Record training samples</h1>
       <Recorder />
     </main>
   );

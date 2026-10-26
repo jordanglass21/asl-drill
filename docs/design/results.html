@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ASL Drill · results mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders:opsz,wght@10..72,800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --board: #0c0b0a; --rail: #151412; --panel: #11100e;
+    --flap: #1d1b18; --flap-top: #211f1b; --flap-lit: #24221e; --flap-lit-top: #282521;
+    --split: #050504; --edge: #2a2723;
+    --cream: #efe5cf; --cream-dim: #6e675c; --label: #8b8274;
+    --amber: #f4a51c; --amber-dim: #7a5512; --miss: #c8604a;
+    --display: "Big Shoulders", "Arial Narrow", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--board); color: var(--cream); }
+  body { font-family: var(--mono); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 16px 24px 0; }
+  .wrap { width: 100%; max-width: 1040px; flex: 1; display: flex; flex-direction: column; gap: 14px; }
+  header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--rail); padding-bottom: 10px; }
+  .brand { font-family: var(--display); font-weight: 800; font-size: 22px; letter-spacing: .06em; text-transform: uppercase; }
+  .brand span { color: var(--amber); }
+  nav { display: flex; gap: 22px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--label); }
+  nav .on { color: var(--cream); }
+  .label { font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--label); }
+
+  /* flaps (same rules as the app) */
+  .flap { --w: 86px; --h: 122px; --f: 106px; --r: 6px; position: relative; flex: none; width: var(--w); height: var(--h);
+          font-family: var(--display); font-weight: 800; font-size: var(--f); line-height: var(--h); text-align: center; color: var(--c, var(--cream-dim)); }
+  .flap.md { --w: 52px; --h: 74px; --f: 64px; --r: 5px; }
+  .flap.sm { --w: 34px; --h: 48px; --f: 42px; --r: 4px; }
+  .flap.xs { --w: 18px; --h: 25px; --f: 22px; --r: 3px; }
+  .flap.current { --c: var(--cream); } .flap.ok { --c: var(--amber); } .flap.miss { --c: var(--miss); }
+  .half { position: absolute; left: 0; right: 0; height: 50%; overflow: hidden; }
+  .half span { display: block; height: var(--h); }
+  .half.t { top: 0; border-radius: var(--r) var(--r) 0 0; background: var(--flap-top); }
+  .half.b { bottom: 0; border-radius: 0 0 var(--r) var(--r); background: var(--flap); }
+  .half.b span { transform: translateY(-50%); }
+  .flap::after { content: ""; position: absolute; left: 0; right: 0; top: calc(50% - 1px); height: 2px; background: var(--split); box-shadow: 0 1px 0 var(--edge); }
+  .word { display: flex; gap: 3px; }
+  .word.center { justify-content: center; }
+
+  .departures { display: grid; grid-template-columns: repeat(5, 1fr); background: var(--rail); border-radius: 4px; overflow: hidden; }
+  .departures div { padding: 7px 14px; border-right: 1px solid var(--board); }
+  .departures div:last-child { border-right: 0; }
+  .departures dt { margin-bottom: 4px; }
+  .departures dd { margin: 0; font-size: 18px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .departures dd.amber { color: var(--amber); }
+  .departures dd small { font-size: 12px; color: var(--label); margin-left: 4px; }
+
+  .title { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0; }
+  .title p { margin: 0; }
+
+  .grid { display: grid; grid-template-columns: 1fr 300px; gap: 10px; align-items: start; }
+  .panel { background: var(--rail); border-radius: 4px; padding: 12px 14px; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th { text-align: left; font-weight: 400; padding: 0 8px 6px 0; }
+  th:not(:first-child), td:not(:first-child) { text-align: right; }
+  td { padding: 3px 8px 3px 0; border-top: 1px solid var(--board); font-size: 14px; }
+  td.status { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+  td.status.ok { color: var(--amber); } td.status.miss { color: var(--miss); }
+
+  .missed { display: flex; flex-direction: column; gap: 10px; }
+  .missed li { display: grid; grid-template-columns: 34px 1fr auto; gap: 12px; align-items: center; }
+  .missed ul { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .missed .why { font-size: 12px; color: var(--label); line-height: 1.5; }
+  .missed .why b { color: var(--cream); font-weight: 500; }
+  .missed .count { font-size: 14px; font-variant-numeric: tabular-nums; }
+
+  footer { position: sticky; bottom: 0; margin-top: auto; padding: 10px 0 12px; border-top: 1px solid var(--rail); background: var(--board);
+           display: flex; justify-content: space-between; align-items: center; }
+  .hint { margin: 0; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--label); }
+  .hint kbd { font-family: var(--mono); color: var(--cream); border: 1px solid var(--edge); border-radius: 3px; padding: 1px 6px; margin-right: 6px; }
+  .hint .sep { margin: 0 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">ASL <span>Drill</span></div>
+    <nav><span>Practice</span><span>Camera</span><span class="on">Results</span><span>Settings</span></nav>
+  </header>
+
+  <div class="title">
+    <div class="word center" id="headline"></div>
+    <p class="label">Session · 10 words · today 16:42</p>
+  </div>
+
+  <dl class="departures">
+    <div><dt class="label">Letters / min</dt><dd class="amber">14.7</dd></div>
+    <div><dt class="label">Accuracy</dt><dd>92<small>%</small></dd></div>
+    <div><dt class="label">Letters</dt><dd>45 <small>/ 49</small></dd></div>
+    <div><dt class="label">Best streak</dt><dd class="amber">20</dd></div>
+    <div><dt class="label">Time</dt><dd>03:04</dd></div>
+  </dl>
+
+  <div class="grid">
+    <section class="panel">
+      <table>
+        <thead><tr><th class="label">Word</th><th class="label">Time</th><th class="label">Letters / min</th><th class="label">Status</th></tr></thead>
+        <tbody id="words"></tbody>
+      </table>
+    </section>
+    <section class="panel missed">
+      <p class="label" style="margin:0">Most missed</p>
+      <ul id="missed"></ul>
+    </section>
+  </div>
+
+  <footer>
+    <p class="hint"><kbd>enter</kbd>New session<span class="sep">·</span><kbd>esc</kbd>Camera check</p>
+    <p class="hint">Stats saved on this device</p>
+  </footer>
+</div>
+<script>
+  const flap = (ch, cls) => `<div class="flap ${cls}"><div class="half t"><span>${ch}</span></div><div class="half b"><span>${ch}</span></div></div>`;
+  document.getElementById("headline").innerHTML = [..."COMPLETE"].map((c) => flap(c, "sm ok")).join("");
+  const words = [
+    ["PLANET", "", "00:19", "19.0"], ["BOOK", "", "00:14", "17.1"], ["SMILE", ".x...", "00:24", "12.5"], ["TRAIN", "", "00:15", "20.0"],
+    ["WATER", "", "00:16", "18.8"], ["MONTH", "x....", "00:31", "9.7"], ["LIGHT", "x....", "00:18", "16.7"], ["QUIET", "x....", "00:22", "13.6"],
+    ["BREAD", "", "00:14", "21.4"], ["FIVE", "", "00:11", "21.8"],
+  ];
+  document.getElementById("words").innerHTML = words.map(([w, marks, t, lpm]) => {
+    const misses = [...marks].filter((m) => m === "x").length;
+    const tiles = [...w].map((c, i) => flap(c, "xs " + (marks[i] === "x" ? "miss" : "ok"))).join("");
+    const status = misses ? `<td class="status miss">${misses} missed</td>` : `<td class="status ok">On time</td>`;
+    return `<tr><td><div class="word">${tiles}</div></td><td>${t}</td><td>${lpm}</td>${status}</tr>`;
+  }).join("");
+  const missed = [["M", "2 of 2", "S"], ["Q", "1 of 1", "P"], ["L", "1 of 3", "A"]];
+  document.getElementById("missed").innerHTML = missed.map(([l, n, as]) =>
+    `<li>${flap(l, "sm miss")}<span class="why">Read as <b>${as}</b> most often</span><span class="count">${n}</span></li>`).join("");
+</script>
+</body>
+</html>
