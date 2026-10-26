@@ -15,10 +15,12 @@ interface Props {
   tag?: string;
   /** Rendered over the live preview (e.g. a countdown). */
   children?: ReactNode;
+  /** Leave more room below the preview, for pages with more controls. */
+  compact?: boolean;
 }
 
 /** Mirrored camera preview with the landmark overlay and permission messages. */
-export function CameraStage({ cameraState, tracking, videoRef, canvasRef, onStart, tag, children }: Props) {
+export function CameraStage({ cameraState, tracking, videoRef, canvasRef, onStart, tag, children, compact = false }: Props) {
   const ready = cameraState.status === "ready";
   const message =
     cameraState.status === "idle"
@@ -32,7 +34,11 @@ export function CameraStage({ cameraState, tracking, videoRef, canvasRef, onStar
             : null;
 
   return (
-    <div className="relative aspect-video max-h-[calc(100vh-300px)] min-h-[260px] w-full overflow-hidden rounded bg-panel">
+    <div
+      className={`relative aspect-video w-full overflow-hidden rounded bg-panel ${
+        compact ? "max-h-[calc(100vh-330px)] min-h-[170px]" : "max-h-[calc(100vh-300px)] min-h-[260px]"
+      }`}
+    >
       <video
         ref={videoRef}
         autoPlay

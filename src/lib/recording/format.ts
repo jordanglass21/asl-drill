@@ -21,9 +21,15 @@ export interface RecordedFrame {
   worldLandmarks: Landmark[];
 }
 
+/** What a take records: one letter, a double letter ("OO"), or a whole word. */
+export type TakeKind = "letter" | "double" | "word";
+
 export interface Take {
   id: string;
+  /** The label: a letter ("B"), a double ("OO"), or a word ("IT"). */
   letter: string;
+  /** Absent in older files, which only recorded single letters. */
+  kind?: TakeKind;
   /** ISO timestamp of when the capture started. */
   startedAt: string;
   handednessSetting: HandednessSetting;

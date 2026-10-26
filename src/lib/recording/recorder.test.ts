@@ -3,6 +3,7 @@ import { join } from "node:path";
 import rightHandFixture from "@/lib/hands/__fixtures__/right-hand.json";
 import { buildRecordingFile, recordingFileName, RECORDING_FORMAT, RECORDING_VERSION } from "./format";
 import {
+  captureMsFor,
   countByLetter,
   initialRecorderState,
   recorderReducer,
@@ -12,7 +13,15 @@ import {
   type RecorderState,
 } from "./recorder";
 
-const config: RecorderConfig = { countdownMs: 3000, captureMs: 2000, minFrames: 3 };
+const config: RecorderConfig = {
+  countdownMs: 3000,
+  captureMs: 2000,
+  doubleCaptureMs: 2500,
+  wordBaseMs: 1500,
+  wordLetterMs: 700,
+  wordMaxMs: 6000,
+  minFrames: 3,
+};
 const run = (events: RecorderEvent[], state: RecorderState = initialRecorderState) =>
   events.reduce((s, e) => recorderReducer(s, e, config), state);
 
@@ -116,6 +125,44 @@ describe("recorderReducer", () => {
   it("counts takes and frames per letter", () => {
     const state = run([...recordB("a"), ...recordB("b", 10_000)]);
     expect(countByLetter(state.takes)).toEqual({ B: { takes: 2, frames: 8 } });
+  });
+});
+
+describe("double and word takes", () => {
+  it("records a double letter with shift and labels it twice", () => {
+    const state = run([
+      { type: "selectLetter", letter: "o", double: true },
+      start(0),
+      { type: "tick", now: 3000 },
+      ...frames(3000, 5, 400),
+      { type: "tick", now: 5500 },
+    ]);
+    expect(state.takes[0]).toMatchObject({ letter: "OO", kind: "double" });
+    expect(state.takes[0]?.frames).toHaveLength(5);
+  });
+
+  it("records a word, with a capture that scales with its length", () => {
+    const selected = run([{ type: "selectWord", word: " it " }]);
+    expect(selected).toMatchObject({ letter: "IT", kind: "word" });
+    expect(captureMsFor("word", "IT", config)).toBe(2900);
+    expect(captureMsFor("word", "ABCDEFGH", config)).toBe(6000);
+    const state = run([start(0), { type: "tick", now: 3000 }, ...frames(3000, 5, 500), { type: "tick", now: 5900 }], selected);
+    expect(state.takes[0]).toMatchObject({ letter: "IT", kind: "word" });
+  });
+
+  it("rejects words that are too short, too long, or not letters", () => {
+    for (const word of ["A", "ABCDEFGHI", "I-T", "12"]) {
+      expect(run([{ type: "selectWord", word }]).letter).toBeNull();
+    }
+  });
+
+  it("switches back to single letters", () => {
+    const state = run([{ type: "selectWord", word: "IT" }, { type: "selectLetter", letter: "b" }]);
+    expect(state).toMatchObject({ letter: "B", kind: "letter" });
+  });
+
+  it("marks plain letter takes as letters", () => {
+    expect(run(recordB()).takes[0]?.kind).toBe("letter");
   });
 });
 

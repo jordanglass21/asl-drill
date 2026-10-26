@@ -18,10 +18,20 @@ function downloadJson(data: unknown, fileName: string) {
 }
 
 /**
- * Drives the /record flow: letter keys pick a letter, space starts a take,
- * escape cancels, backspace deletes the last take, cmd/ctrl+S exports.
+ * Drives the /record flow: letter keys pick a letter (shift for a double),
+ * "/" opens word mode, space starts a take, escape cancels, backspace deletes
+ * the last take, cmd/ctrl+S exports.
  */
-export function useRecorder({ handedness, enabled }: { handedness: HandednessSetting; enabled: boolean }) {
+export function useRecorder({
+  handedness,
+  enabled,
+  onWordKey,
+}: {
+  handedness: HandednessSetting;
+  enabled: boolean;
+  /** Called when "/" is pressed, to focus the word box. */
+  onWordKey?: () => void;
+}) {
   const [state, dispatch] = useReducer(reducer, initialRecorderState);
   const [now, setNow] = useState(0);
   const capturingRef = useRef(false);
@@ -94,12 +104,15 @@ export function useRecorder({ handedness, enabled }: { handedness: HandednessSet
       } else if (event.key === "Backspace") {
         dispatch({ type: "deleteLastTake" });
       } else if (/^[a-z]$/i.test(event.key)) {
-        dispatch({ type: "selectLetter", letter: event.key });
+        dispatch({ type: "selectLetter", letter: event.key, double: event.shiftKey });
+      } else if (event.key === "/") {
+        event.preventDefault();
+        onWordKey?.();
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [start, exportTakes]);
+  }, [start, exportTakes, onWordKey]);
 
   useEffect(() => {
     if (!state.unsaved) return;
@@ -108,7 +121,11 @@ export function useRecorder({ handedness, enabled }: { handedness: HandednessSet
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, [state.unsaved]);
 
-  const selectLetter = useCallback((letter: string) => dispatch({ type: "selectLetter", letter }), []);
+  const selectLetter = useCallback(
+    (letter: string, double = false) => dispatch({ type: "selectLetter", letter, double }),
+    [],
+  );
+  const selectWord = useCallback((word: string) => dispatch({ type: "selectWord", word }), []);
 
-  return { state, now, onFrame, start, exportTakes, selectLetter };
+  return { state, now, onFrame, start, exportTakes, selectLetter, selectWord };
 }
