@@ -8,6 +8,8 @@ from typing import Literal
 
 import numpy as np
 
+# Bump (in both languages) whenever the output changes; models record it.
+NORMALIZATION_VERSION = 1
 LANDMARK_COUNT = 21
 FEATURE_COUNT = LANDMARK_COUNT * 3
 WRIST = 0

@@ -3,7 +3,11 @@ name = "asl-drill-training"
 version = "0.1.0"
 description = "Data preparation and classifier training for ASL Drill"
 requires-python = ">=3.12,<3.13"
-dependencies = ["numpy>=2"]
+dependencies = [
+    "huggingface-hub>=2.3.0",
+    "numpy>=2",
+    "scikit-learn>=1.9.1",
+]
 
 [dependency-groups]
 dev = ["pytest>=8"]

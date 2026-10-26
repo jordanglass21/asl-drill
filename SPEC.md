@@ -32,8 +32,8 @@ Do not build Phase 2 features yet, but avoid design choices that would block the
 
 - **App:** Next.js (App Router), TypeScript (strict), Tailwind CSS
 - **Hand tracking:** MediaPipe Hand Landmarker (`@mediapipe/tasks-vision`), running in the browser
-- **Inference:** TensorFlow.js, running a model trained offline
-- **Training:** Python (in `/training`), exporting to TensorFlow.js format
+- **Inference:** plain TypeScript, running a small model trained offline (no ML runtime in the browser)
+- **Training:** Python (in `/training`) with scikit-learn, exporting weights to a JSON model file
 - **Testing:** Jest for logic; CI on GitHub Actions
 - **Hosting:** Vercel via its GitHub integration, custom subdomain asldrill.jordanglass.dev
 - **No backend or database in the MVP**
@@ -51,7 +51,7 @@ Do not build Phase 2 features yet, but avoid design choices that would block the
 
 The normalization must behave identically in Python (training) and TypeScript (the app). Keep a shared set of test fixtures (raw landmarks in, expected normalized output) and test both implementations against them.
 
-**Static letter classifier.** A small neural network (MLP) over the 63 normalized values, trained in Python and exported to TensorFlow.js. Use a confidence threshold so low-confidence frames count as "no letter" rather than a wrong guess.
+**Static letter classifier.** A small neural network (MLP) over the 63 normalized values, trained in Python with scikit-learn and exported as a versioned JSON file of float32 weights. The app runs the forward pass in plain TypeScript: the model is small enough that an ML runtime would only add weight, and TensorFlow.js and its Python converter are no longer actively released. As with normalization, Python and TypeScript are tested against shared fixtures (feature vectors in, class probabilities out) so they produce matching probabilities. If a later model needs more than an MLP (e.g. a sequence model for motion), revisit this choice. Use a confidence threshold so low-confidence frames count as "no letter" rather than a wrong guess.
 
 **Training data.** Start with the Hugging Face dataset `sid220/asl-now-fingerspelling` (MIT-licensed, captured with the same MediaPipe web hand landmarker; confirm license and format before use). Supplement it with our own recordings via a `/record` page. Raw datasets are not committed to git.
 
@@ -83,7 +83,7 @@ The normalization module (with shared fixtures) and a `/record` page: pick a let
 *Done when:* normalization tests pass, and a recorded session exports a usable dataset file.
 
 **M3: Static letter recognition**
-Python training pipeline in `/training`, model export to TensorFlow.js, and in-browser inference showing the live predicted letter and confidence.
+Python training pipeline in `/training`, model export to JSON, and in-browser inference (plain TypeScript) showing the live predicted letter and confidence.
 *Done when:* static letters are recognized live, and training reports per-letter accuracy on a held-out set, highlighting the most-confused pairs.
 
 **M4: Visual identity and practice screen design**
