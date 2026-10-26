@@ -46,3 +46,6 @@ next-env.d.ts
 # python
 __pycache__/
 .venv/
+
+# MediaPipe Wasm runtime, copied from node_modules on install
+/public/mediapipe/tasks-vision-*/
