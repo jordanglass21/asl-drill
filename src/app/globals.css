@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+/* Dark-first palette; a light theme can be added later. */
+:root {
+  --background: #1e1f22;
+  --foreground: #d1d0c5;
+  --muted: #646669;
+  --accent: #e2b714;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+}
