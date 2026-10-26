@@ -1,25 +1,171 @@
 @import "tailwindcss";
 
-/* Dark-first palette; a light theme can be added later. */
+/*
+ * ASL Drill board: a split-flap departures board. Dark only for now.
+ * One accent (amber) for confirmed letters and highlights; --miss is used
+ * only for missed letters.
+ */
 :root {
-  --background: #1e1f22;
-  --foreground: #d1d0c5;
-  --muted: #646669;
-  --surface: #2b2d31;
-  --accent: #e2b714;
+  --board: #0c0b0a;
+  --rail: #151412;
+  --panel: #11100e;
+  --flap: #1d1b18;
+  --flap-top: #211f1b;
+  --flap-lit: #24221e;
+  --flap-lit-top: #282521;
+  --split: #050504;
+  --edge: #2a2723;
+
+  --cream: #efe5cf;
+  --cream-dim: #6e675c;
+  --label: #8b8274;
+
+  --amber: #f4a51c;
+  --amber-dim: #7a5512;
+  --miss: #c8604a;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
-  --color-surface: var(--surface);
-  --color-accent: var(--accent);
-  --font-mono: var(--font-geist-mono);
+  --color-board: var(--board);
+  --color-rail: var(--rail);
+  --color-panel: var(--panel);
+  --color-flap: var(--flap);
+  --color-edge: var(--edge);
+  --color-cream: var(--cream);
+  --color-cream-dim: var(--cream-dim);
+  --color-label: var(--label);
+  --color-amber: var(--amber);
+  --color-amber-dim: var(--amber-dim);
+  --color-miss: var(--miss);
+  --font-display: var(--font-big-shoulders), "Arial Narrow", sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+html {
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  background: var(--board);
+  color: var(--cream);
+  font-family: var(--font-mono);
 }
+
+/* Small-caps label used across the board (stat headers, tags). */
+@utility label {
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--label);
+}
+
+/* ---------- Flaps ---------- */
+
+.flap {
+  --flap-w: 86px;
+  --flap-h: 122px;
+  --flap-font: 106px;
+  --flap-radius: 6px;
+  position: relative;
+  flex: none;
+  width: var(--flap-w);
+  height: var(--flap-h);
+  perspective: calc(var(--flap-h) * 4.25);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--flap-font);
+  line-height: var(--flap-h);
+  text-align: center;
+  color: var(--flap-color, var(--cream-dim));
+  user-select: none;
+}
+.flap[data-size="md"] { --flap-w: 52px; --flap-h: 74px; --flap-font: 64px; --flap-radius: 5px; }
+.flap[data-size="sm"] { --flap-w: 34px; --flap-h: 48px; --flap-font: 42px; --flap-radius: 4px; }
+
+.flap[data-state="current"] { --flap-color: var(--cream); --flap-face: var(--flap-lit); --flap-face-top: var(--flap-lit-top); }
+.flap[data-state="confirmed"] { --flap-color: var(--amber); }
+.flap[data-state="missed"] { --flap-color: var(--miss); }
+
+.flap-half,
+.flap-leaf {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50%;
+  overflow: hidden;
+  backface-visibility: hidden;
+}
+.flap-half > span,
+.flap-leaf > span {
+  display: block;
+  height: var(--flap-h);
+}
+.flap-half.top { top: 0; border-radius: var(--flap-radius) var(--flap-radius) 0 0; background: var(--flap-face-top, var(--flap-top)); }
+.flap-half.bottom { bottom: 0; border-radius: 0 0 var(--flap-radius) var(--flap-radius); background: var(--flap-face, var(--flap)); }
+.flap-half.bottom > span,
+.flap-leaf.landing > span { transform: translateY(-50%); }
+
+/* The split: a dark gap with a hairline highlight, plus the side pins. */
+.flap::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% - 1px);
+  height: 2px;
+  background: var(--split);
+  box-shadow: 0 1px 0 var(--edge);
+  z-index: 5;
+}
+.flap::before {
+  content: "";
+  position: absolute;
+  top: calc(50% - 4px);
+  left: -3px;
+  right: -3px;
+  height: 8px;
+  z-index: 6;
+  background:
+    linear-gradient(var(--split), var(--split)) left / 3px 100% no-repeat,
+    linear-gradient(var(--split), var(--split)) right / 3px 100% no-repeat;
+}
+
+.flap-caret {
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  bottom: -9px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--cream);
+}
+
+/* Confirm flip: the old top half falls forward, then the new bottom half lands. */
+.flap-leaf { display: none; z-index: 4; }
+@media (prefers-reduced-motion: no-preference) {
+  .flap[data-flipping] .flap-leaf { display: block; }
+  .flap[data-flipping] .flap-half.bottom { color: var(--flap-from); }
+  .flap-leaf.falling {
+    top: 0;
+    transform-origin: bottom;
+    border-radius: var(--flap-radius) var(--flap-radius) 0 0;
+    background: var(--flap-lit-top);
+    color: var(--flap-from);
+    animation: flap-fall 160ms cubic-bezier(0.55, 0, 0.9, 0.4) forwards;
+  }
+  .flap-leaf.landing {
+    bottom: 0;
+    transform-origin: top;
+    transform: rotateX(90deg);
+    border-radius: 0 0 var(--flap-radius) var(--flap-radius);
+    background: var(--flap);
+    color: var(--flap-color);
+    animation: flap-land 220ms 150ms cubic-bezier(0.2, 0.9, 0.3, 1.25) forwards;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flap[data-flipping] { animation: flap-fade 200ms ease-out; }
+}
+@keyframes flap-fall { to { transform: rotateX(-90deg); filter: brightness(0.6); } }
+@keyframes flap-land { to { transform: rotateX(0deg); } }
+@keyframes flap-fade { from { opacity: 0.3; } to { opacity: 1; } }

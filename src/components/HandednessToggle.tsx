@@ -23,8 +23,7 @@ export function HandednessToggle({ value, onChange }: Props) {
   };
 
   return (
-    <div role="radiogroup" aria-label="Signing hand" className="flex items-center gap-1 text-sm" onKeyDown={onKeyDown}>
-      <span className="mr-2 text-muted">hand</span>
+    <div role="radiogroup" aria-label="Signing hand" className="flex items-center gap-0.5" onKeyDown={onKeyDown}>
       {HANDEDNESS_OPTIONS.map((option) => {
         const selected = option === value;
         return (
@@ -39,8 +38,8 @@ export function HandednessToggle({ value, onChange }: Props) {
             aria-checked={selected}
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(option)}
-            className={`rounded px-2 py-1 transition-colors focus-visible:outline-2 focus-visible:outline-accent ${
-              selected ? "text-accent" : "text-muted hover:text-foreground"
+            className={`rounded-[3px] px-1.5 py-0.5 text-sm font-medium uppercase tracking-[0.08em] transition-colors focus-visible:outline-2 focus-visible:outline-amber ${
+              selected ? "text-amber" : "text-label hover:text-cream"
             }`}
           >
             {option}

@@ -1,4 +1,11 @@
-import { cameraReducer, classifyCameraError, initialCameraState, type CameraState } from "./status";
+import {
+  CAMERA_ERROR_MESSAGES,
+  CAMERA_STATUS_MESSAGES,
+  cameraReducer,
+  classifyCameraError,
+  initialCameraState,
+  type CameraState,
+} from "./status";
 
 const requesting: CameraState = { status: "requesting" };
 const ready: CameraState = { status: "ready" };
@@ -60,5 +67,14 @@ describe("classifyCameraError", () => {
   it("handles non-error values", () => {
     expect(classifyCameraError(undefined)).toBe("unknown");
     expect(classifyCameraError("nope")).toBe("unknown");
+  });
+});
+
+describe("board messages", () => {
+  it("keep flap codes short enough for the board", () => {
+    for (const { code } of [...Object.values(CAMERA_ERROR_MESSAGES), ...Object.values(CAMERA_STATUS_MESSAGES)]) {
+      expect(code.length).toBeLessThanOrEqual(9);
+      expect(code).toBe(code.toUpperCase());
+    }
   });
 });

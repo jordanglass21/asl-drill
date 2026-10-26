@@ -55,5 +55,10 @@ export function useLetterReading() {
     }
   }, []);
 
-  return { status: failed ? "error" : model ? "ready" : "loading", reading, onFrame } as const;
+  return {
+    status: failed ? "error" : model ? "ready" : "loading",
+    reading,
+    threshold: model?.threshold ?? null,
+    onFrame,
+  } as const;
 }
