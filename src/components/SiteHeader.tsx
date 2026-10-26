@@ -4,8 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const LINKS = [
-  { href: "/", label: "Camera" },
-  { href: "/record", label: "Record" },
+  { href: "/play", label: "Play" },
+  { href: "/camera", label: "Camera" },
+  { href: "/results", label: "Results" },
 ] as const;
 
 export function SiteHeader() {

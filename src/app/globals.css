@@ -81,6 +81,8 @@ body {
 }
 .flap[data-size="md"] { --flap-w: 52px; --flap-h: 74px; --flap-font: 64px; --flap-radius: 5px; }
 .flap[data-size="sm"] { --flap-w: 34px; --flap-h: 48px; --flap-font: 42px; --flap-radius: 4px; }
+.flap[data-size="xs"] { --flap-w: 18px; --flap-h: 25px; --flap-font: 22px; --flap-radius: 3px; }
+.flap[data-size="xs"]::before { display: none; }
 
 .flap[data-state="current"] { --flap-color: var(--cream); --flap-face: var(--flap-lit); --flap-face-top: var(--flap-lit-top); }
 .flap[data-state="confirmed"] { --flap-color: var(--amber); }
@@ -138,7 +140,9 @@ body {
   height: 3px;
   border-radius: 2px;
   background: var(--cream);
+  transition: background-color 120ms;
 }
+.flap-caret[data-wrong] { background: var(--miss); }
 
 /* Confirm flip: the old top half falls forward, then the new bottom half lands. */
 .flap-leaf { display: none; z-index: 4; }
