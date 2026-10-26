@@ -15,9 +15,9 @@ import {
 const hand = (side: HandSide, score: number, index = 0): DetectedHand => ({ side, score, landmarks: [], index });
 
 describe("labelToSide", () => {
-  it("swaps MediaPipe's mirrored labels to the signer's physical hand", () => {
-    expect(labelToSide("Left")).toBe("right");
-    expect(labelToSide("Right")).toBe("left");
+  it("uses MediaPipe's labels as the signer's physical hand", () => {
+    expect(labelToSide("Left")).toBe("left");
+    expect(labelToSide("Right")).toBe("right");
   });
 
   it("rejects unknown labels", () => {
