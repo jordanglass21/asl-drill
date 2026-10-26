@@ -12,7 +12,14 @@ import {
   type SelectionState,
 } from "./handedness";
 
-const hand = (side: HandSide, score: number, index = 0): DetectedHand => ({ side, score, landmarks: [], index });
+const hand = (side: HandSide, score: number, index = 0): DetectedHand => ({
+  side,
+  score,
+  label: side === "left" ? "Left" : "Right",
+  landmarks: [],
+  worldLandmarks: [],
+  index,
+});
 
 describe("labelToSide", () => {
   it("uses MediaPipe's labels as the signer's physical hand", () => {
@@ -30,7 +37,7 @@ describe("toDetectedHands", () => {
   it("reads a single right hand", () => {
     const hands = toDetectedHands(rightHandFixture);
     expect(hands).toHaveLength(1);
-    expect(hands[0]).toMatchObject({ side: "right", score: 0.97, index: 0 });
+    expect(hands[0]).toMatchObject({ side: "right", score: 0.97, label: "Right", index: 0 });
     expect(hands[0]?.landmarks).toHaveLength(21);
   });
 
