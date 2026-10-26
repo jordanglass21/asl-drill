@@ -8,6 +8,7 @@ import {
   initialSelectionState,
   selectSigningHand,
   toDetectedHands,
+  type DetectedHand,
   type HandednessSetting,
   type HandSide,
   type SelectionState,
@@ -55,11 +56,24 @@ export interface HandTrackingState {
   retry: () => void;
 }
 
+/** One processed video frame, passed to `onFrame`. */
+export interface TrackedFrame {
+  /** performance.now() when the frame was processed. */
+  now: number;
+  /** The signing hand, if one is in view. */
+  hand: DetectedHand | null;
+  hands: DetectedHand[];
+  width: number;
+  height: number;
+}
+
 interface Options {
   videoRef: RefObject<HTMLVideoElement | null>;
   canvasRef: RefObject<HTMLCanvasElement | null>;
   active: boolean;
   setting: HandednessSetting;
+  /** Called for every processed frame; may change between renders. */
+  onFrame?: (frame: TrackedFrame) => void;
 }
 
 /**
@@ -67,7 +81,7 @@ interface Options {
  * reports which hand is signing. React state only changes when the readout
  * does, not on every frame.
  */
-export function useHandTracking({ videoRef, canvasRef, active, setting }: Options): HandTrackingState {
+export function useHandTracking({ videoRef, canvasRef, active, setting, onFrame }: Options): HandTrackingState {
   const [landmarker, setLandmarker] = useState<HandLandmarker | null>(null);
   const [failed, setFailed] = useState(false);
   const [readout, setReadout] = useState<{ signingSide: HandSide | null; handCount: number }>({
@@ -76,6 +90,11 @@ export function useHandTracking({ videoRef, canvasRef, active, setting }: Option
   });
   const settingRef = useRef(setting);
   const selectionRef = useRef<SelectionState>(initialSelectionState);
+  const onFrameRef = useRef(onFrame);
+
+  useEffect(() => {
+    onFrameRef.current = onFrame;
+  }, [onFrame]);
 
   useEffect(() => {
     settingRef.current = setting;
@@ -125,11 +144,13 @@ export function useHandTracking({ videoRef, canvasRef, active, setting }: Option
           canvas.width = video.videoWidth;
           canvas.height = video.videoHeight;
         }
-        const result = landmarker.detectForVideo(video, performance.now());
+        const now = performance.now();
+        const result = landmarker.detectForVideo(video, now);
         const hands = toDetectedHands(result);
         const { hand, state } = selectSigningHand(hands, settingRef.current, selectionRef.current);
         selectionRef.current = state;
         drawHands(ctx, hands, hand?.index ?? null, colors, true);
+        onFrameRef.current?.({ now, hand, hands, width: video.videoWidth, height: video.videoHeight });
 
         const next = { signingSide: hand?.side ?? null, handCount: hands.length };
         if (next.signingSide !== last.signingSide || next.handCount !== last.handCount) {

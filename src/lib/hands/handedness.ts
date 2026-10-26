@@ -10,6 +10,8 @@ export interface Landmark {
 /** The parts of MediaPipe's HandLandmarkerResult that we consume. */
 export interface HandResult {
   landmarks: Landmark[][];
+  /** Metric 3D coordinates centered on the hand; absent in some fixtures. */
+  worldLandmarks?: Landmark[][];
   handedness: { categoryName: string; score: number }[][];
 }
 
@@ -20,7 +22,10 @@ export interface DetectedHand {
   /** The signer's physical hand. */
   side: HandSide;
   score: number;
+  /** MediaPipe's own handedness label ("Left"/"Right"), before our swap. */
+  label: string;
   landmarks: Landmark[];
+  worldLandmarks: Landmark[];
   /** Index into the original result, for drawing. */
   index: number;
 }
@@ -43,7 +48,10 @@ export function toDetectedHands(result: HandResult): DetectedHand[] {
   result.landmarks.forEach((landmarks, index) => {
     const category = result.handedness[index]?.[0];
     const side = category ? labelToSide(category.categoryName) : null;
-    if (side && category) hands.push({ side, score: category.score, landmarks, index });
+    if (side && category) {
+      const worldLandmarks = result.worldLandmarks?.[index] ?? [];
+      hands.push({ side, score: category.score, label: category.categoryName, landmarks, worldLandmarks, index });
+    }
   });
   return hands;
 }

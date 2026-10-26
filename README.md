@@ -13,3 +13,7 @@ npm run lint
 npm run typecheck
 npm test
 ```
+
+## Training
+
+See [`training/README.md`](training/README.md). Record samples at `/record` (not linked from the app).

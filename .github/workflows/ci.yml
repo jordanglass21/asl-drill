@@ -23,3 +23,17 @@ jobs:
       - run: npm run typecheck
       - run: npm test -- --ci
       - run: npm run build
+
+  training:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: training
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v10.3.2
+        with:
+          enable-cache: true
+          cache-dependency-glob: training/uv.lock
+      - run: uv sync --locked
+      - run: uv run pytest
