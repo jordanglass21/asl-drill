@@ -86,11 +86,15 @@ The normalization module (with shared fixtures) and a `/record` page: pick a let
 Python training pipeline in `/training`, model export to TensorFlow.js, and in-browser inference showing the live predicted letter and confidence.
 *Done when:* static letters are recognized live, and training reports per-letter accuracy on a held-out set, highlighting the most-confused pairs.
 
-**M4: Practice loop**
+**M4: Visual identity and practice screen design**
+Replace the placeholder look (currently close to Monkeytype's default theme and the template font) with ASL Drill's own identity: palette, typography, and spacing as design tokens in `globals.css`, then designs for the practice screen (word display, letter-by-letter progress, pass/fail feedback), the results screen, and the hand overlay. Keep the Monkeytype qualities (minimal, fast, keyboard-first, dark-mode first) without copying its look. Start by collecting 2–3 reference apps or sites from Jordan and agreeing on a direction before building.
+*Done when:* the tokens are in place, the existing camera screen uses them, and the practice and results screens are designed and approved, ready to build in M5.
+
+**M5: Practice loop**
 Word list, letter-by-letter progress with hold-to-confirm, pass/fail per letter, results screen (letters per minute, accuracy, most-missed letters), and stats saved in localStorage.
 *Done when:* a full session can be played start to finish and stats persist across reloads.
 
-**M5: Motion letters and double letters**
+**M6: Motion letters and double letters**
 The motion detector for J, Z, and double letters, wired into the practice loop.
 *Done when:* words like JAZZ, BOOK, and JELLY can be completed reliably.
 
