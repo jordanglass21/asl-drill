@@ -37,7 +37,7 @@ export function Recorder() {
       <Departures
         items={[
           { label: "Signing hand", value: <HandednessToggle value={handedness} onChange={setHandedness} />, span: 1.6 },
-          { label: `Recording · ${kindLabel}`, value: state.letter ?? "—", highlight: Boolean(state.letter), span: 1.3 },
+          { label: `Recording ${kindLabel}`, value: state.letter ?? "—", highlight: Boolean(state.letter), span: 1.3 },
           { label: "Takes", value: state.takes.length },
           { label: "Frames", value: totalFrames },
           { label: "Export", value: state.unsaved ? "pending" : state.takes.length ? "saved" : "—", highlight: state.unsaved },
@@ -103,7 +103,7 @@ export function Recorder() {
             <div>
               <p className="label mb-1">Doubles and words</p>
               <p className="text-xs leading-relaxed text-cream">
-                {extras.map(([label, count]) => `${label} ${count.takes}`).join(" · ")}
+                {extras.map(([label, count]) => `${label} ${count.takes}`).join(", ")}
               </p>
             </div>
           )}

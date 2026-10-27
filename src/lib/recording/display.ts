@@ -8,7 +8,7 @@ export function phaseOverlay(phase: RecorderPhase, now: number): { label: string
     return { label: String(Math.max(1, Math.ceil((phase.until - now) / 1000))), detail: "get ready" };
   }
   if (phase.kind === "capturing") {
-    return { label: "●", detail: `recording · ${phase.frames.length} frames` };
+    return { label: "●", detail: `recording, ${phase.frames.length} frames` };
   }
   return null;
 }

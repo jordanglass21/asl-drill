@@ -16,7 +16,7 @@ export function SiteHeader() {
       <Link href="/" className="font-display text-[22px] font-extrabold uppercase tracking-[0.06em] text-cream">
         ASL <span className="text-amber">Drill</span>
       </Link>
-      <nav className="flex gap-5 text-xs uppercase tracking-[0.14em]">
+      <nav className="flex gap-5 signage text-base">
         {LINKS.map(({ href, label }) => (
           <Link
             key={href}

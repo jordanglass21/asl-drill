@@ -57,7 +57,7 @@ export function CameraCheck() {
         <ReadingPanel status={letters.status} reading={reading} threshold={letters.threshold} motion={motion.last} />
       </div>
       <KeyHints hints={[{ text: "Hold up a handshape to read it" }, { text: "Readings aren't saved" }]}>
-        <Link href="/record" className="label !text-[11px] hover:!text-amber">
+        <Link href="/record" className="label hover:!text-amber">
           Record training samples →
         </Link>
       </KeyHints>

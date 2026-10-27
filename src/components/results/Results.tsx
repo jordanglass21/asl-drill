@@ -4,20 +4,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { useSessions } from "@/hooks/useSessions";
 import { findSession } from "@/lib/practice/storage";
-import { formatClock, summarize } from "@/lib/practice/stats";
+import { formatClock, formatEnded, summarize } from "@/lib/practice/stats";
 import { BoardButton } from "../board/BoardButton";
 import { Departures } from "../board/Departures";
 import { Flap } from "../board/Flap";
 import { FlapWord } from "../board/FlapWord";
 import { KeyHints } from "../board/KeyHints";
-
-function formatWhen(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "";
-  const today = new Date().toDateString() === date.toDateString();
-  const time = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  return today ? `today ${time}` : `${date.toLocaleDateString()} ${time}`;
-}
 
 export function Results() {
   const router = useRouter();
@@ -37,7 +29,7 @@ export function Results() {
 
   const hints = (
     <KeyHints hints={[{ keys: "enter", text: "new session" }, { keys: "esc", text: "camera check" }]}>
-      <p className="label !text-[11px]">Stats saved on this device</p>
+      <p className="label">Stats saved on this device</p>
     </KeyHints>
   );
 
@@ -61,9 +53,16 @@ export function Results() {
     <>
       <div className="flex flex-col items-center gap-1.5">
         <FlapWord text="COMPLETE" state="confirmed" size="sm" />
-        <p className="label">
-          Session · {session.words.length} words · {formatWhen(session.endedAt)}
-        </p>
+        <dl className="flex gap-7">
+          <div className="flex flex-col items-center gap-0.5">
+            <dt className="label">Words</dt>
+            <dd className="text-sm text-cream tabular-nums">{session.words.length}</dd>
+          </div>
+          <div className="flex flex-col items-center gap-0.5">
+            <dt className="label">Ended</dt>
+            <dd className="text-sm text-cream tabular-nums">{formatEnded(session.endedAt)}</dd>
+          </div>
+        </dl>
       </div>
 
       <Departures
@@ -105,7 +104,7 @@ export function Results() {
                   </td>
                   <td className="pr-2 text-right text-sm">{formatClock(word.activeMs)}</td>
                   <td className="pr-2 text-right text-sm">{word.lettersPerMinute.toFixed(1)}</td>
-                  <td className={`text-right text-[11px] uppercase tracking-[0.14em] ${word.misses ? "text-miss" : "text-amber"}`}>
+                  <td className={`text-right signage text-[15px] ${word.misses ? "text-miss" : "text-amber"}`}>
                     {word.misses ? `${word.misses} missed` : "On time"}
                   </td>
                 </tr>

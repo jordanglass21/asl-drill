@@ -24,7 +24,7 @@ export function ReadingPanel({ status, reading, threshold, motion = null }: Prop
         </div>
         {motion && (
           <p className="mt-1.5 text-xs text-amber">
-            {motion.kind === "double" ? `double letter · ${motion.style}` : `${motion.kind} · motion`}
+            {motion.kind === "double" ? `double letter, ${motion.style}` : `${motion.kind}, motion`}
           </p>
         )}
       </div>

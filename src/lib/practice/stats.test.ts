@@ -1,5 +1,5 @@
 import type { LetterResult, WordResult } from "./session";
-import { formatClock, summarize } from "./stats";
+import { formatClock, formatEnded, summarize } from "./stats";
 
 const l = (letter: string, result: "pass" | "miss", readAs: string | null = null): LetterResult => ({
   letter,
@@ -55,5 +55,21 @@ describe("formatClock", () => {
   it("formats mm:ss", () => {
     expect(formatClock(0)).toBe("00:00");
     expect(formatClock(184_900)).toBe("03:04");
+  });
+});
+
+describe("formatEnded", () => {
+  const now = new Date(2026, 9, 27, 18, 0);
+
+  it("says Today for a session that ended today", () => {
+    expect(formatEnded(new Date(2026, 9, 27, 17, 31).toISOString(), now, "en-US")).toBe("Today 5:31 PM");
+  });
+
+  it("shows the date for an earlier day", () => {
+    expect(formatEnded(new Date(2026, 9, 26, 9, 5).toISOString(), now, "en-US")).toBe("10/26/2026 9:05 AM");
+  });
+
+  it("returns an empty string for a bad timestamp", () => {
+    expect(formatEnded("not a date", now)).toBe("");
   });
 });
