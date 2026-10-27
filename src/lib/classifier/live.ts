@@ -5,7 +5,7 @@ import { normalizeLandmarks } from "@/lib/landmarks/normalize";
 import { predictProbabilities, topLetter, type LetterModel } from "./model";
 
 /** Versioned like the MediaPipe assets: replace the file under a new name. */
-export const LETTER_MODEL_PATH = "/models/letters-v2.json";
+export const LETTER_MODEL_PATH = "/models/letters-v3.json";
 
 export interface LiveReading {
   /** Accepted letter, or null below the confidence threshold. */

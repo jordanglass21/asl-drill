@@ -20,7 +20,7 @@ from asl_drill.model import predict_exported
 
 TRAINING = Path(__file__).resolve().parents[1]
 ROOT = TRAINING.parent
-MODEL_PATH = ROOT / "public" / "models" / "letters-v2.json"
+MODEL_PATH = ROOT / "public" / "models" / "letters-v3.json"
 FIXTURE_PATH = ROOT / "fixtures" / "classifier" / "parity.json"
 NORMALIZATION_CASES = ROOT / "fixtures" / "normalization" / "cases.json"
 
@@ -50,7 +50,7 @@ def write_parity_fixture(exported: dict[str, Any], ours: Sequence[Sample], asl_n
     FIXTURE_PATH.write_text(
         json.dumps(
             {
-                "model": "public/models/letters-v2.json",
+                "model": "public/models/letters-v3.json",
                 "tolerance": 1e-6,
                 "cases": [
                     {"name": n, "input": x, "expected": [float(p) for p in row]}
