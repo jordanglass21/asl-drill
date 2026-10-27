@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useReducer, useRef, useState } from "react";
 import { readHand } from "@/lib/classifier/live";
 import type { LetterModel } from "@/lib/classifier/model";
 import { initialMotionState, stepMotion, type MotionState } from "@/lib/motion/detector";
@@ -102,6 +102,17 @@ export function usePractice({
     }, TICK_MS);
     return () => clearInterval(id);
   }, [playing]);
+
+  // Next keeps a visited page mounted but hidden (Activity) and re-runs its
+  // effects when it's shown again. Start over each time /play is left, or the
+  // finished session would reopen its results as soon as the player comes back.
+  useLayoutEffect(
+    () => () => {
+      motionRef.current = initialMotionState;
+      dispatch({ type: "reset" });
+    },
+    [],
+  );
 
   // Save and show results when the session ends.
   useEffect(() => {
