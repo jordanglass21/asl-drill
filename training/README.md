@@ -19,6 +19,10 @@ Raw data lives in `training/data/` and is never committed.
   you like: each file holds every take so far, and takes that appear in several
   files are only counted once.
 
+- **Excluded takes:** `training/excluded_takes.json` lists takes that training
+  skips (by take id, with the reason). The raw recordings stay on disk; remove
+  an entry to use that take again.
+
 - **asl-now** (`sid220/asl-now-fingerspelling`, MIT): `uv run python scripts/download_asl_now.py`
   downloads a pinned revision to `training/data/asl-now/`.
 
@@ -33,13 +37,13 @@ decides per sample whether a hand is mirrored), cross-validates by take, and
 compares ours-only against ours + asl-now on your held-out takes. The combined
 data ships only if it doesn't lower held-out accuracy. It writes:
 
-- `public/models/letters-v3.json`: the model the app loads
-- `training/reports/letters-v3.md`: per-letter accuracy, confused pairs, thresholds
-- `training/reports/letters-v3-orientation.html`: skeletons to eyeball orientation
+- `public/models/letters-v4.json`: the model the app loads
+- `training/reports/letters-v4.md`: per-letter accuracy, confused pairs, thresholds
+- `training/reports/letters-v4-orientation.html`: skeletons to eyeball orientation
 - `fixtures/classifier/parity.json`: inputs and expected probabilities that the
   TypeScript classifier must reproduce
 
-Every retrain that ships needs a new name (next: `letters-v4`): bump it in
+Every retrain that ships needs a new name (next: `letters-v5`): bump it in
 `scripts/train_letters.py`, `scripts/make_classifier_fixtures.py`, and
 `LETTER_MODEL_PATH`, since model files are cached as immutable for a year.
 

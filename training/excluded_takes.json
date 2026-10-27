@@ -1,0 +1,60 @@
+{
+  "comment": "Takes left out of training. The raw recordings stay on disk; remove an entry to use it again.",
+  "takes": [
+    {
+      "id": "f8890d90-bc62-4ce7-bc02-bf551ca05f49",
+      "letter": "P",
+      "reason": "Pointed at the camera with a bent middle finger; asl-now's P is a K tipped down. Other signers' P scored 19% under v3."
+    },
+    {
+      "id": "569aee25-7107-468a-9a83-55467f5bede9",
+      "letter": "P",
+      "reason": "Same session as the take above."
+    },
+    {
+      "id": "211ce2d2-1b76-4096-8c8c-c561aaefef86",
+      "letter": "P",
+      "reason": "Same session as the take above."
+    },
+    {
+      "id": "0ae8018b-87e9-4e9f-a53f-43ee7a5f7082",
+      "letter": "Q",
+      "reason": "Index half bent and middle finger half raised, close to the new P; asl-now's Q is a G tipped down."
+    },
+    {
+      "id": "5e922008-5cbe-45ae-a91f-ffbb141f15b9",
+      "letter": "Q",
+      "reason": "Same Q shape as the take above."
+    },
+    {
+      "id": "7564f375-db46-4eee-a4a9-6b5edbc3ac64",
+      "letter": "Q",
+      "reason": "Same Q shape as the take above."
+    },
+    {
+      "id": "34b868e7-28d0-4bbc-b6ab-b7ce52fdf187",
+      "letter": "Q",
+      "reason": "Same Q shape as the take above."
+    },
+    {
+      "id": "4435611a-0554-45cb-9b08-da9602eebd5e",
+      "letter": "Q",
+      "reason": "Same Q shape as the take above."
+    },
+    {
+      "id": "48fbedce-6367-45f5-80d6-bd48d305f9a0",
+      "letter": "Q",
+      "reason": "Same Q shape as the take above."
+    },
+    {
+      "id": "7124e14e-5414-4bd7-83d6-956998ad819d",
+      "letter": "Q",
+      "reason": "Same Q shape as the take above."
+    },
+    {
+      "id": "18f107e7-421d-49d7-af2a-efdccb02dd7e",
+      "letter": "Q",
+      "reason": "Same Q shape as the take above."
+    }
+  ]
+}

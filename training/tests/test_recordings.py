@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 
 from asl_drill.normalize import FEATURE_COUNT, normalize_landmarks
+from asl_drill.datasets import load_excluded_takes, load_ours
 from asl_drill.recordings import RecordingError, load_recording, to_samples
 
 SAMPLE = Path(__file__).resolve().parents[2] / "fixtures" / "recording" / "sample-v1.json"
@@ -68,3 +69,15 @@ def test_rejects_unknown_files(tmp_path, content):
     path.write_text(json.dumps(content))
     with pytest.raises(RecordingError):
         load_recording(path)
+
+
+def test_load_ours_skips_excluded_takes():
+    samples = load_ours(SAMPLE.parent, excluded={"sample-k"})
+    assert {s.group for s in samples} == {"sample-b"}
+
+
+def test_every_excluded_take_names_a_letter_and_reason():
+    path = Path(__file__).resolve().parents[1] / "excluded_takes.json"
+    entries = json.loads(path.read_text())["takes"]
+    assert load_excluded_takes(path) == {e["id"] for e in entries}
+    assert all(e["letter"] and e["reason"] for e in entries)

@@ -26,10 +26,18 @@ class Sample:
     source: str  # "ours" or "asl-now"
 
 
-def load_ours(directory: Path, letters: Iterable[str] = STATIC_LETTERS) -> list[Sample]:
-    """Frames from /record exports, each take counted once across files."""
+def load_excluded_takes(path: Path) -> set[str]:
+    """Take ids listed in excluded_takes.json, which training skips."""
+    return {entry["id"] for entry in json.loads(path.read_text())["takes"]}
+
+
+def load_ours(
+    directory: Path, letters: Iterable[str] = STATIC_LETTERS, excluded: Iterable[str] = ()
+) -> list[Sample]:
+    """Frames from /record exports, each take counted once across files.
+    Takes whose id is in `excluded` are skipped."""
     wanted = set(letters)
-    seen: set[str] = set()
+    seen: set[str] = set(excluded)
     samples: list[Sample] = []
     for path in sorted(directory.glob("*.json")):
         for take in load_recording(path)["takes"]:

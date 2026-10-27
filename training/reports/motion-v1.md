@@ -10,7 +10,7 @@ on double letters, so they're listed for information.
 | Z | 17 | 16 (94%) | 0 | 0 |
 | doubles | 30 | 30 (100%) | 0 | 0 |
 | words | 27 | – | 0 | 0 |
-| static letters | 127 | – | 0 | 0 |
+| static letters | 137 | – | 0 | 0 |
 
 ## Misses and false alarms
 
