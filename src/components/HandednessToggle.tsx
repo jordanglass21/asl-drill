@@ -38,7 +38,7 @@ export function HandednessToggle({ value, onChange }: Props) {
             aria-checked={selected}
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(option)}
-            className={`rounded-[3px] px-1.5 py-0.5 text-sm font-medium uppercase tracking-[0.08em] transition-colors focus-visible:outline-2 focus-visible:outline-amber ${
+            className={`rounded-[3px] px-1.5 py-0.5 signage text-lg transition-colors focus-visible:outline-2 focus-visible:outline-amber ${
               selected ? "text-amber" : "text-label hover:text-cream"
             }`}
           >

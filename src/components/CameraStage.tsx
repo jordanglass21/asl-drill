@@ -54,7 +54,7 @@ export function CameraStage({ cameraState, tracking, videoRef, canvasRef, onStar
       />
       {ready && (
         <p className="label pointer-events-none absolute top-2.5 left-3">
-          Camera{tag && <> · <b className="font-medium text-amber">{tag}</b></>}
+          Camera{tag && <><span className="mx-1.5 text-edge">/</span><b className="font-bold text-amber">{tag}</b></>}
         </p>
       )}
       {message ? <div className="absolute inset-0 bg-panel">{<CameraMessage {...message} />}</div> : children}

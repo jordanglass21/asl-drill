@@ -108,7 +108,7 @@ export function Play() {
         hints={
           playing
             ? [{ text: "Hold the handshape to confirm" }, { keys: "esc", text: "skip letter" }, { keys: "tab", text: "new word" }]
-            : [{ keys: "enter", text: "start" }, { text: "Trace J and Z · slide or bounce double letters" }]
+            : [{ keys: "enter", text: "start" }, { text: "Trace J and Z" }, { text: "slide or bounce double letters" }]
         }
       />
     </>

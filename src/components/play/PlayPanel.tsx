@@ -59,11 +59,11 @@ export function PlayPanel({ reading, target, mode, wrongReading, hold, upcoming,
       {playing ? (
         <div>
           <p className="label mb-1">Next</p>
-          <p className="text-sm tracking-[0.2em] text-cream">{upcoming.length ? upcoming.join(" · ") : "—"}</p>
+          <p className="flex flex-wrap gap-x-3 signage text-lg text-cream">{upcoming.length ? upcoming.map((word, i) => <span key={i}>{word}</span>) : "—"}</p>
         </div>
       ) : (
         <BoardButton onClick={onStart} disabled={!canStart}>
-          {canStart ? "Start · enter" : "Waiting for camera"}
+          {canStart ? "Start" : "Waiting for camera"}
         </BoardButton>
       )}
     </aside>

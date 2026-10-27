@@ -97,3 +97,12 @@ export function formatClock(ms: number): string {
   const seconds = Math.floor(ms / 1000);
   return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
 }
+
+/** When a session ended, e.g. "Today 5:31 PM" or "10/26/2026 5:31 PM"; "" if unparseable. */
+export function formatEnded(iso: string, now: Date = new Date(), locale?: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const time = date.toLocaleTimeString(locale, { hour: "numeric", minute: "2-digit" });
+  const day = date.toDateString() === now.toDateString() ? "Today" : date.toLocaleDateString(locale);
+  return `${day} ${time}`;
+}

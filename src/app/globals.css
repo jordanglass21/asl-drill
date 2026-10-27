@@ -51,10 +51,23 @@ body {
   font-family: var(--font-mono);
 }
 
-/* Small-caps label used across the board (stat headers, tags). */
+/* Board signage: condensed caps from the flap face, for nav, buttons, statuses,
+   and hints. Data values stay in the mono face. */
+@utility signage {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+/* Column header over a value, like a departures board. */
 @utility label {
-  font-size: 10.5px;
-  letter-spacing: 0.16em;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
   text-transform: uppercase;
   color: var(--label);
 }

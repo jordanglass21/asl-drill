@@ -17,6 +17,6 @@ describe("phaseOverlay", () => {
 
   it("shows the frame count while recording", () => {
     const phase = { kind: "capturing" as const, startedAt: 0, until: 2000, take, camera: null, frames: [] };
-    expect(phaseOverlay(phase, 100)?.detail).toBe("recording · 0 frames");
+    expect(phaseOverlay(phase, 100)?.detail).toBe("recording, 0 frames");
   });
 });
