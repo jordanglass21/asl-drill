@@ -1,4 +1,4 @@
-import shippedModel from "../../../public/models/letters-v3.json";
+import shippedModel from "../../../public/models/letters-v4.json";
 import normalizationCases from "../../../fixtures/normalization/cases.json";
 import type { DetectedHand } from "@/lib/hands/handedness";
 import { readHand, readingChanged } from "./live";
