@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { readHand } from "@/lib/classifier/live";
 import type { LetterModel } from "@/lib/classifier/model";
+import { initialMotionState, stepMotion, type MotionState } from "@/lib/motion/detector";
 import { initialPracticeState, practiceReducer, type PracticeEvent, type PracticeState } from "@/lib/practice/session";
 import { saveSession } from "@/lib/practice/storage";
 import { boardView } from "@/lib/practice/view";
@@ -24,15 +25,25 @@ function localStorageOrUndefined(): Storage | undefined {
 }
 
 /**
- * Runs a practice session: feeds each tracked frame's reading to the session
- * reducer, ticks the clock, handles keys (enter start, esc skip letter, tab
+ * Runs a practice session: feeds each tracked frame's reading and any J, Z, or
+ * double-letter motion to the session reducer, ticks the clock, handles keys (enter start, esc skip letter, tab
  * new word), and saves the session then opens its results when it ends.
  */
-export function usePractice({ model, canStart }: { model: LetterModel | null; canStart: () => boolean }) {
+export function usePractice({
+  model,
+  canStart,
+  words,
+}: {
+  model: LetterModel | null;
+  canStart: () => boolean;
+  /** Fixed words to play (e.g. from ?words=); otherwise random ones. */
+  words?: string[] | null;
+}) {
   const router = useRouter();
   const [state, dispatch] = useReducer(reducer, initialPracticeState);
   const [now, setNow] = useState(0);
   const modelRef = useRef(model);
+  const motionRef = useRef<MotionState>(initialMotionState);
   const playingRef = useRef(false);
   const playing = state.phase === "playing";
 
@@ -48,18 +59,27 @@ export function usePractice({ model, canStart }: { model: LetterModel | null; ca
     if (!playingRef.current || !loaded) return;
     const reading = frame.hand ? readHand(loaded, frame.hand, frame.width, frame.height) : null;
     dispatch({ type: "reading", now: frame.now, letter: reading?.letter ?? null, hand: frame.hand !== null });
+    const motion = stepMotion(
+      motionRef.current,
+      frame.hand && frame.height > 0
+        ? { t: frame.now, landmarks: frame.hand.landmarks, side: frame.hand.side, aspectRatio: frame.width / frame.height }
+        : null,
+    );
+    motionRef.current = motion.state;
+    for (const event of motion.events) dispatch({ type: "motion", now: frame.now, motion: event });
   }, []);
 
   const start = useCallback(() => {
     if (!canStart()) return;
+    motionRef.current = initialMotionState;
     dispatch({
       type: "start",
       now: performance.now(),
       id: crypto.randomUUID(),
       startedAt: new Date().toISOString(),
-      words: pickWords(playableWords(), WORDS_PER_SESSION),
+      words: words ?? pickWords(playableWords(), WORDS_PER_SESSION),
     });
-  }, [canStart]);
+  }, [canStart, words]);
 
   const skipLetter = useCallback(() => dispatch({ type: "skipLetter", now: performance.now() }), []);
 

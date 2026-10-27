@@ -1,3 +1,4 @@
+import type { MotionEvent } from "@/lib/motion/detector";
 import {
   DEFAULT_PRACTICE_CONFIG,
   initialPracticeState,
@@ -36,6 +37,9 @@ class Sim {
   spell(word: string, holdMs = 400) {
     for (const letter of word) this.show(letter, holdMs).show(null, 100);
     return this;
+  }
+  motion(motion: MotionEvent) {
+    return this.send({ type: "motion", now: this.now, motion });
   }
   /** Waits out the pause between words. */
   pause() {
@@ -130,5 +134,53 @@ describe("practiceReducer", () => {
       ["CAT", 3],
       ["DOG", 1],
     ]);
+  });
+});
+
+describe("motion letters and doubles", () => {
+  const J: MotionEvent = { kind: "J" };
+  const Z: MotionEvent = { kind: "Z" };
+  const slide: MotionEvent = { kind: "double", style: "slide" };
+  const results = (sim: Sim) => sim.playing.current.map((l) => `${l.letter}:${l.result}`);
+
+  it("passes J and Z on their motion, not on a hold", () => {
+    const sim = new Sim().start(["JAZ"]).show("I", 1000);
+    expect(sim.playing.current).toEqual([]); // holding I never counts as J
+    sim.motion(J).show("A", 400).show(null, 100).motion(Z);
+    expect(results(sim)).toEqual(["J:pass", "A:pass", "Z:pass"]);
+  });
+
+  it("ignores the wrong motion for the target", () => {
+    const sim = new Sim().start(["JAZ"]).motion(Z).motion(slide);
+    expect(sim.playing.current).toEqual([]);
+  });
+
+  it("doesn't confirm the second of a double just by holding on", () => {
+    const sim = new Sim().start(["BOOK"]).spell("B").show("O", 2000);
+    expect(results(sim)).toEqual(["B:pass", "O:pass"]);
+  });
+
+  it("confirms the second of a double on a slide or bounce", () => {
+    const sim = new Sim().start(["BOOK"]).spell("B").show("O", 600).motion(slide);
+    expect(results(sim)).toEqual(["B:pass", "O:pass", "O:pass"]);
+  });
+
+  it("confirms the second of a double after releasing and re-forming it", () => {
+    const sim = new Sim().start(["BOOK"]).spell("B").show("O", 600).show(null, 300).show("O", 400);
+    expect(results(sim)).toEqual(["B:pass", "O:pass", "O:pass"]);
+  });
+
+  it("ignores a double motion when the target isn't a repeat", () => {
+    const sim = new Sim().start(["BOOK"]).show("A", 200).motion(slide);
+    expect(sim.playing.current).toEqual([]);
+  });
+
+  it.each([
+    ["JAZZ", (s: Sim) => s.show("I", 300).motion(J).show("A", 400).show(null, 100).motion(Z).show(null, 900).motion(Z)],
+    ["BOOK", (s: Sim) => s.spell("B").show("O", 600).motion(slide).show(null, 100).spell("K")],
+    ["JELLY", (s: Sim) => s.motion(J).spell("E").show("L", 600).motion(slide).show(null, 100).spell("Y")],
+  ])("completes %s", (word, play) => {
+    const sim = play(new Sim().start([word]));
+    expect(results(sim)).toEqual([...word].map((l) => `${l}:pass`));
   });
 });

@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
-    "test": "jest"
+    "test": "jest",
+    "eval:motion": "MOTION_EVAL=1 jest src/lib/motion/recordings.eval --silent=false"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "1.1.1",
