@@ -47,6 +47,17 @@ Every retrain that ships needs a new name (next: `letters-v5`): bump it in
 `scripts/train_letters.py`, `scripts/make_classifier_fixtures.py`, and
 `LETTER_MODEL_PATH`, since model files are cached as immutable for a year.
 
+## Alphabet reference
+
+```bash
+uv run --group render python scripts/render_alphabet.py
+```
+
+Draws the landing page's 26 reference hands from your recordings (skipping
+excluded takes) into `public/reference/alphabet-v1/`. After a retrain that
+changes the poses, write to a new folder and update `ALPHABET_REFERENCE_DIR`,
+since those files are cached as immutable.
+
 ## Normalization
 
 `asl_drill/normalize.py` must match `src/lib/landmarks/normalize.ts` exactly.

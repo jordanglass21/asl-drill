@@ -6,15 +6,10 @@ import { useEffect, useState } from "react";
 import { boardButtonClass } from "../board/BoardButton";
 import { Flap } from "../board/Flap";
 import { KeyHints } from "../board/KeyHints";
+import { AlphabetReference } from "./AlphabetReference";
 
 const HEADLINE = "ASL DRILL";
 const FLIP_STAGGER_MS = 90;
-
-const STEPS = [
-  { n: "01", name: "Camera", text: "Check that your hand is tracked and read.", href: "/camera" },
-  { n: "02", name: "Play", text: "Spell 10 words. Hold each handshape until its flap turns.", href: "/play" },
-  { n: "03", name: "Results", text: "Letters per minute, accuracy, and your most-missed letters.", href: "/results" },
-] as const;
 
 /** The headline flaps settle into place one by one, like a board updating. */
 function useSettledCount(total: number) {
@@ -80,18 +75,7 @@ export function Landing() {
         </div>
       </section>
 
-      <ol className="grid overflow-hidden rounded bg-rail sm:grid-cols-3">
-        {STEPS.map((step) => (
-          <li key={step.n} className="border-board sm:border-r sm:last:border-r-0">
-            <Link href={step.href} className="group flex flex-col gap-1 px-3.5 py-2.5">
-              <span className="label">
-                {step.n} · <span className="text-cream transition-colors group-hover:text-amber">{step.name}</span>
-              </span>
-              <span className="text-xs leading-relaxed text-label">{step.text}</span>
-            </Link>
-          </li>
-        ))}
-      </ol>
+      <AlphabetReference />
 
       <KeyHints hints={[{ keys: "enter", text: "play" }, { keys: "c", text: "camera check" }]}>
         <p className="label !text-[11px]">A practice tool, not a dictionary</p>
