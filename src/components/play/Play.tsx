@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useHandCamera } from "@/hooks/useHandCamera";
 import { useHandednessSetting } from "@/hooks/useHandednessSetting";
 import type { TrackedFrame } from "@/hooks/useHandTracking";
@@ -8,6 +9,7 @@ import { useLetterReading } from "@/hooks/useLetterReading";
 import { usePractice, WORDS_PER_SESSION } from "@/hooks/usePractice";
 import { trackingReadout } from "@/lib/hands/readout";
 import { formatClock } from "@/lib/practice/stats";
+import { parseWordList } from "@/lib/practice/words";
 import { CameraStage } from "../CameraStage";
 import { Departures } from "../board/Departures";
 import { Flap } from "../board/Flap";
@@ -21,7 +23,9 @@ export function Play() {
   const letters = useLetterReading();
   const canStartRef = useRef(false);
   const canStart = useCallback(() => canStartRef.current, []);
-  const practice = usePractice({ model: letters.model, canStart });
+  const wordsParam = useSearchParams().get("words");
+  const words = useMemo(() => parseWordList(wordsParam), [wordsParam]);
+  const practice = usePractice({ model: letters.model, canStart, words });
 
   const { onFrame: lettersFrame } = letters;
   const { onFrame: practiceFrame } = practice;
@@ -50,7 +54,7 @@ export function Play() {
           {
             label: "Word",
             value: playing ? view.word : "—",
-            unit: playing ? `${view.wordNumber} / ${view.wordCount}` : `${WORDS_PER_SESSION} words`,
+            unit: playing ? `${view.wordNumber} / ${view.wordCount}` : `${words?.length ?? WORDS_PER_SESSION} words`,
             span: 2.2,
           },
           { label: "Letters / min", value: summary ? summary.lettersPerMinute.toFixed(1) : "—", highlight: true },
@@ -90,6 +94,7 @@ export function Play() {
         <PlayPanel
           reading={letters.reading}
           target={view?.target ?? null}
+          mode={view?.mode ?? "hold"}
           wrongReading={view?.wrongReading ?? null}
           hold={view?.hold ?? 0}
           upcoming={view?.upcoming ?? []}
@@ -103,7 +108,7 @@ export function Play() {
         hints={
           playing
             ? [{ text: "Hold the handshape to confirm" }, { keys: "esc", text: "skip letter" }, { keys: "tab", text: "new word" }]
-            : [{ keys: "enter", text: "start" }, { text: "J, Z, and double letters arrive later" }]
+            : [{ keys: "enter", text: "start" }, { text: "Trace J and Z · slide or bounce double letters" }]
         }
       />
     </>

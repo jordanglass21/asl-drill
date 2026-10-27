@@ -12,8 +12,11 @@ npm run dev        # http://localhost:3000
 npm run lint
 npm run typecheck
 npm test
+npm run eval:motion   # J/Z/double detector report over training/data/recordings
 ```
 
 ## Training
 
 See [`training/README.md`](training/README.md). Record samples at `/record` (not linked from the app).
+
+To practice specific words, open `/play?words=jazz,book,jelly`.

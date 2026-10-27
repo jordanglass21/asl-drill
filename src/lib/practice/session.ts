@@ -1,12 +1,18 @@
 // A practice session as a pure reducer. Time comes in with every event, so
 // whole sessions can be replayed in tests without a camera.
 //
-// Forgiving rules: a letter passes when its handshape is held (hold.ts). A
-// wrong handshape never fails it; the letter is missed only when skipped or
-// after `letterTimeoutMs` of active time. Active time pauses while no hand is
-// in view, while the tab is hidden, and between words.
+// Forgiving rules: a letter passes when its handshape is held (hold.ts). J and
+// Z pass on their motion instead, and the second of a double letter passes on
+// a slide or bounce, or by releasing the handshape and forming it again. A
+// wrong handshape never fails a letter; it's missed only when skipped or after
+// `letterTimeoutMs` of active time. Active time pauses while no hand is in
+// view, while the tab is hidden, and between words.
 
+import type { MotionEvent } from "@/lib/motion/detector";
 import { DEFAULT_HOLD_CONFIG, initialHoldState, stepHold, type HoldConfig, type HoldState } from "./hold";
+
+/** Letters confirmed by motion rather than by holding a handshape. */
+export const MOTION_LETTERS = new Set(["J", "Z"]);
 
 export interface PracticeConfig {
   hold: HoldConfig;
@@ -79,6 +85,7 @@ export type PracticeState = { phase: "ready" } | Playing | { phase: "done"; reco
 export type PracticeEvent =
   | { type: "start"; now: number; id: string; startedAt: string; words: string[] }
   | { type: "reading"; now: number; letter: string | null; hand: boolean }
+  | { type: "motion"; now: number; motion: MotionEvent }
   | { type: "tick"; now: number; hidden: boolean; isoNow: string }
   | { type: "skipLetter"; now: number }
   | { type: "replaceWord"; now: number; word: string }
@@ -123,8 +130,20 @@ export function practiceReducer(
       if (next.wordDoneAt !== null) return { ...next, reading: event.letter };
       const { state: hold, held } = stepHold(next.hold, event.letter, event.now, config.hold);
       next = { ...next, hold, reading: event.letter };
-      if (held !== null && held === targetLetter(next)) return resolveLetter(next, "pass", event.now);
+      const target = targetLetter(next);
+      if (held !== null && held === target && !MOTION_LETTERS.has(target)) return resolveLetter(next, "pass", event.now);
       return next;
+    }
+    case "motion": {
+      const next = advanceClock(state, event.now, config);
+      if (next.wordDoneAt !== null) return next;
+      const target = targetLetter(next);
+      if (target === null) return next;
+      const { motion } = event;
+      const passes = MOTION_LETTERS.has(target)
+        ? motion.kind === target
+        : motion.kind === "double" && isRepeat(next);
+      return passes ? resolveLetter(next, "pass", event.now) : next;
     }
     case "tick": {
       const next = advanceClock({ ...state, hidden: event.hidden }, event.now, config);
@@ -148,6 +167,12 @@ export function practiceReducer(
 
 export function targetLetter(state: Playing): string | null {
   return state.words[state.wordIndex]?.[state.current.length] ?? null;
+}
+
+/** Whether the target is the second of a double letter (e.g. the second O in BOOK). */
+export function isRepeat(state: Playing): boolean {
+  const target = targetLetter(state);
+  return target !== null && state.current.length > 0 && state.words[state.wordIndex]?.[state.current.length - 1] === target;
 }
 
 function isActive(state: Playing, now: number, config: PracticeConfig): boolean {
@@ -189,7 +214,11 @@ function resolveLetter(state: Playing, result: "pass" | "miss", now: number, ski
   if (skipped) entry.skipped = true;
   const current = [...state.current, entry];
   const wordDone = current.length >= (state.words[state.wordIndex]?.length ?? 0);
-  return { ...resetLetter(state), current, wordDoneAt: wordDone ? now : null };
+  // Keep a completed hold "fired" so continuing to hold the same handshape
+  // can't confirm the second of a double letter; it has to be released (or
+  // slid/bounced) first.
+  const hold = result === "pass" ? state.hold : initialHoldState;
+  return { ...resetLetter(state), hold, current, wordDoneAt: wordDone ? now : null };
 }
 
 function nextWord(state: Playing, isoNow: string): PracticeState {

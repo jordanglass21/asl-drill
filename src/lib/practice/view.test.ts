@@ -35,3 +35,19 @@ describe("boardView", () => {
     expect(view?.hold).toBeCloseTo(0.5, 1);
   });
 });
+
+describe("boardView modes", () => {
+  const start = (word: string): PracticeEvent => ({ type: "start", now: 0, id: "s", startedAt: ISO, words: [word] });
+
+  it("marks J and Z as motion letters and never flags their readings as wrong", () => {
+    const view = boardView(play([start("JAM"), reading(33, "I")]), 33);
+    expect(view).toMatchObject({ target: "J", mode: "motion", wrongReading: null });
+  });
+
+  it("marks the second of a double", () => {
+    const holdB = Array.from({ length: 12 }, (_, i) => reading(33 * (i + 1), "B"));
+    const holdO = Array.from({ length: 12 }, (_, i) => reading(500 + 33 * i, "O"));
+    const view = boardView(play([start("BOOK"), ...holdB, reading(430, null), reading(470, null), ...holdO]), 900);
+    expect(view).toMatchObject({ target: "O", mode: "double", hold: 0 });
+  });
+});

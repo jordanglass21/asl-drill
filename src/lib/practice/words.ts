@@ -1,6 +1,5 @@
-// The practice word list: common English words, 3–7 letters. Words with J or
-// Z need motion and words with double letters need the double-letter
-// detector; both arrive in M6, so they're filtered out until then.
+// The practice word list: common English words, 3–7 letters, including words
+// with J and Z (confirmed by motion) and double letters (slide or bounce).
 
 const WORD_LIST = `
 able about above actor adult after again agent agree ahead alarm album alert alive allow alone along alter angel anger
@@ -39,9 +38,12 @@ export const WORDS: readonly string[] = [...new Set(WORD_LIST.trim().split(/\s+/
 export const needsMotion = (word: string) => /[JZ]/.test(word);
 export const hasDoubleLetter = (word: string) => /(.)\1/.test(word);
 
-/** Words the current recognizer can play: static letters, no doubles (until M6). */
-export function playableWords(words: readonly string[] = WORDS): string[] {
-  return words.filter((word) => !needsMotion(word) && !hasDoubleLetter(word));
+/** Words to play, optionally leaving out motion letters or doubles. */
+export function playableWords(
+  words: readonly string[] = WORDS,
+  { motion = true, doubles = true }: { motion?: boolean; doubles?: boolean } = {},
+): string[] {
+  return words.filter((word) => (motion || !needsMotion(word)) && (doubles || !hasDoubleLetter(word)));
 }
 
 /** Small seeded PRNG (mulberry32) so word picks are reproducible in tests. */
@@ -69,4 +71,14 @@ export function pickWords(
     [candidates[i], candidates[j]] = [candidates[j] as string, candidates[i] as string];
   }
   return candidates.slice(0, count);
+}
+
+/** Parses a `?words=` list (e.g. "jazz,book"); null when absent or invalid. */
+export function parseWordList(raw: string | null | undefined): string[] | null {
+  if (!raw) return null;
+  const words = raw
+    .split(",")
+    .map((w) => w.trim().toUpperCase())
+    .filter((w) => /^[A-Z]{2,12}$/.test(w));
+  return words.length ? words.slice(0, 20) : null;
 }
