@@ -25,6 +25,11 @@ const nextConfig: NextConfig = {
         source: "/models/:path*",
         headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
       },
+      {
+        // Reference images live in versioned folders (see src/lib/reference/alphabet.ts).
+        source: "/reference/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
     ];
   },
 };
