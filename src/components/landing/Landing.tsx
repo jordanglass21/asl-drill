@@ -77,9 +77,7 @@ export function Landing() {
 
       <AlphabetReference />
 
-      <KeyHints hints={[{ keys: "enter", text: "play" }, { keys: "c", text: "camera check" }]}>
-        <p className="label">A practice tool, not a dictionary</p>
-      </KeyHints>
+      <KeyHints hints={[{ keys: "enter", text: "play" }, { keys: "c", text: "camera check" }]} />
     </>
   );
 }
