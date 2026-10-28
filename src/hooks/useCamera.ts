@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useCallback, useLayoutEffect, useReducer, useRef } from "react";
 import { cameraReducer, classifyCameraError, initialCameraState } from "@/lib/camera/status";
 
 const VIDEO_CONSTRAINTS: MediaTrackConstraints = {
@@ -54,19 +54,28 @@ export function useCamera() {
     }
   }, [releaseStream]);
 
+  /** Abandons any pending request and turns the camera off. */
   const stop = useCallback(() => {
     requestIdRef.current++;
     releaseStream();
     dispatch({ type: "stopped" });
   }, [releaseStream]);
 
-  useEffect(
-    () => () => {
-      requestIdRef.current++;
-      releaseStream();
-    },
-    [releaseStream],
-  );
+  // Next keeps a visited page mounted but hidden (Activity), running this
+  // cleanup on hide and the effect again on show. Release the camera while
+  // hidden and say so, or the page would come back claiming a camera that's
+  // off; then turn it back on if it was live, since permission is granted.
+  const resumeRef = useRef(false);
+  useLayoutEffect(() => {
+    if (resumeRef.current) {
+      resumeRef.current = false;
+      void start();
+    }
+    return () => {
+      resumeRef.current = streamRef.current !== null;
+      stop();
+    };
+  }, [start, stop]);
 
   return { state, videoRef, start, stop };
 }
