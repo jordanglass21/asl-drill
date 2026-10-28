@@ -13,7 +13,7 @@ export function CameraMessage({ code, title, detail, action }: Props) {
       <FlapWord text={code} size="sm" />
       <div className="flex flex-col items-center gap-1.5">
         <p className="font-display text-2xl font-extrabold uppercase tracking-[0.04em] text-cream">{title}</p>
-        <p className="max-w-md text-xs leading-relaxed text-label">{detail}</p>
+        <p className="max-w-md font-prose text-[13px] leading-relaxed text-label">{detail}</p>
       </div>
       {action && (
         <BoardButton onClick={action.onClick} autoFocus>

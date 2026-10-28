@@ -59,7 +59,7 @@ export function Landing() {
           <p className="font-display text-3xl font-extrabold uppercase leading-tight tracking-[0.03em] sm:text-4xl">
             Fingerspelling practice with your webcam
           </p>
-          <p className="text-xs leading-relaxed text-label">
+          <p className="font-prose text-[13px] leading-relaxed text-label">
             Hold each handshape until it’s recognized, then move to the next one. It all runs in your browser, so your
             video stays on your device.
           </p>

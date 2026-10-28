@@ -117,9 +117,15 @@ describe("recentAverage", () => {
 
 describe("describeRecent", () => {
   it("shows the change against recent sessions", () => {
-    expect(describeRecent(48.6, { lettersPerMinute: 42.3, count: 10 })).toEqual({ text: "▲ 6.3 vs your last 10", trend: "up" });
-    expect(describeRecent(37.4, { lettersPerMinute: 38.5, count: 1 })).toEqual({ text: "▼ 1.1 vs your last session", trend: "down" });
-    expect(describeRecent(30, null)).toEqual({ text: "First session", trend: null });
+    expect(describeRecent(48.6, { lettersPerMinute: 42.3, count: 10 })).toEqual({
+      change: { trend: "up", arrow: "▲", amount: "6.3" },
+      text: "vs your last 10",
+    });
+    expect(describeRecent(37.4, { lettersPerMinute: 38.5, count: 1 })).toEqual({
+      change: { trend: "down", arrow: "▼", amount: "1.1" },
+      text: "vs your last session",
+    });
+    expect(describeRecent(30, null)).toEqual({ change: null, text: "First session" });
   });
 });
 

@@ -68,7 +68,7 @@ export function Recorder() {
 
         <aside className="flex flex-col gap-2.5 self-start rounded bg-rail p-3.5">
           <p className="label">Status</p>
-          <p aria-live="polite" className="text-xs leading-relaxed text-cream">
+          <p aria-live="polite" className="font-prose text-[13px] leading-relaxed text-cream">
             {state.notice ??
               (state.letter
                 ? `Press space to record ${state.kind === "word" ? `"${state.letter}"` : state.letter}.`

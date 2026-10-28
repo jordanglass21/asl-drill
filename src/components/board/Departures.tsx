@@ -25,7 +25,7 @@ export function Departures({ items }: { items: DepartureItem[] }) {
             {item.value}
             {item.unit && <small className="ml-1 text-xs text-label">{item.unit}</small>}
           </dd>
-          {item.sub && <dd className="mt-0.5 text-xs text-label">{item.sub}</dd>}
+          {item.sub && <dd className="mt-0.5 font-prose text-[13px] text-label">{item.sub}</dd>}
         </div>
       ))}
     </dl>

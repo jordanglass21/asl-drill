@@ -43,7 +43,7 @@ export function Results() {
         <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
           <FlapWord text="NO DATA" size="sm" />
           <p className="font-display text-2xl font-extrabold uppercase tracking-[0.04em]">No sessions yet</p>
-          <p className="text-xs text-label">Play a session and your results land here.</p>
+          <p className="font-prose text-[13px] text-label">Play a session and your results land here.</p>
           <BoardButton onClick={() => router.push("/play")}>Play</BoardButton>
         </div>
         {hints}
@@ -83,10 +83,14 @@ export function Results() {
             value: s.lettersPerMinute.toFixed(1),
             highlight: true,
             span: 1.2,
-            sub: recent.trend ? (
+            sub: recent.change ? (
               <>
-                <span className={recent.trend === "up" ? "text-amber" : "text-miss"}>{recent.text.slice(0, recent.text.indexOf(" vs "))}</span>
-                {recent.text.slice(recent.text.indexOf(" vs "))}
+                <span className={recent.change.trend === "up" ? "text-amber" : "text-miss"}>
+                  {/* The prose face has no triangles; the fallback glyph runs large. */}
+                  <span className="mr-1 align-[1px] text-[9px]">{recent.change.arrow}</span>
+                  {recent.change.amount}
+                </span>{" "}
+                {recent.text}
               </>
             ) : (
               recent.text
