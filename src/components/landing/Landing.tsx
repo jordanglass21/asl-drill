@@ -57,11 +57,11 @@ export function Landing() {
 
         <div className="flex max-w-xl flex-col items-center gap-2.5">
           <p className="font-display text-3xl font-extrabold uppercase leading-tight tracking-[0.03em] sm:text-4xl">
-            Fingerspelling practice, graded live by your webcam
+            Fingerspelling practice with your webcam
           </p>
           <p className="text-xs leading-relaxed text-label">
-            Hold each handshape and watch the board flip. Typing-test stats at the end. Everything runs in your browser;
-            video never leaves your device.
+            Hold each handshape until it’s recognized, then move to the next one. It all runs in your browser, so your
+            video stays on your device.
           </p>
         </div>
 
