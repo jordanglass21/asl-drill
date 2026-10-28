@@ -30,7 +30,7 @@ export function PlayPanel({ reading, target, mode, wrongReading, hold, upcoming,
         <p className="label mb-2">Reading</p>
         <div className="flex items-end gap-3">
           <Flap char={playing ? shown : ""} state={playing ? state : "pending"} size="md" animate={false} />
-          <p aria-live="polite" className="pb-1 text-xs leading-snug">
+          <p aria-live="polite" className="pb-1 font-prose text-[13px] leading-snug">
             {playing && wrongReading && target ? (
               <span className="text-miss">
                 not {target}

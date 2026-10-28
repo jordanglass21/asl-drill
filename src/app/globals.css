@@ -39,6 +39,8 @@
   --color-miss: var(--miss);
   --font-display: var(--font-big-shoulders), "Arial Narrow", sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  /* Sentences and notes; numbers, letters, and keys stay in the mono face. */
+  --font-prose: var(--font-plex-sans-condensed), "Arial Narrow", sans-serif;
 }
 
 html {

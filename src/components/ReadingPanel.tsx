@@ -23,7 +23,7 @@ export function ReadingPanel({ status, reading, threshold, motion = null }: Prop
           <Flap char={letter} state={motionLetter ? "confirmed" : reading?.letter ? "current" : "pending"} size="md" animate={false} />
         </div>
         {motion && (
-          <p className="mt-1.5 text-xs text-amber">
+          <p className="mt-1.5 font-prose text-[13px] text-amber">
             {motion.kind === "double" ? `double letter, ${motion.style}` : `${motion.kind}, motion`}
           </p>
         )}
@@ -42,7 +42,7 @@ export function ReadingPanel({ status, reading, threshold, motion = null }: Prop
           <span>{reading ? `${confidence}%` : ""}</span>
         </p>
       </div>
-      <p className="text-[11px] leading-relaxed text-label">
+      <p className="font-prose text-xs leading-relaxed text-label">
         Trace J or Z, or slide or bounce a letter, to see it detected. Dim means below the{" "}
         {threshold !== null ? `${Math.round(threshold * 100)}% ` : ""}threshold.
       </p>

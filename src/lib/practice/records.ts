@@ -140,13 +140,19 @@ export function describeStanding(s: Standing): { value: string; note: string } {
   }
 }
 
-/** The line under letters per minute, e.g. "▲ 6.3 vs your last 10". */
-export function describeRecent(lettersPerMinute: number, recent: ReturnType<typeof recentAverage>): {
-  text: string;
-  trend: "up" | "down" | null;
-} {
-  if (!recent) return { text: "First session", trend: null };
+/**
+ * The line under letters per minute, e.g. "▲ 6.3 vs your last 10", in parts
+ * so the change can be colored. `change` is null when there's nothing to compare.
+ */
+export function describeRecent(
+  lettersPerMinute: number,
+  recent: ReturnType<typeof recentAverage>,
+): { change: { trend: "up" | "down"; arrow: "▲" | "▼"; amount: string } | null; text: string } {
+  if (!recent) return { change: null, text: "First session" };
   const delta = lettersPerMinute - recent.lettersPerMinute;
-  const than = recent.count === 1 ? "your last session" : `your last ${recent.count}`;
-  return { text: `${delta >= 0 ? "▲" : "▼"} ${Math.abs(delta).toFixed(1)} vs ${than}`, trend: delta >= 0 ? "up" : "down" };
+  const trend = delta >= 0 ? "up" : "down";
+  return {
+    change: { trend, arrow: trend === "up" ? "▲" : "▼", amount: Math.abs(delta).toFixed(1) },
+    text: recent.count === 1 ? "vs your last session" : `vs your last ${recent.count}`,
+  };
 }

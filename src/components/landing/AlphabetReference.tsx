@@ -11,12 +11,12 @@ export function AlphabetReference() {
         <h2 id="alphabet-reference" className="label">
           How I sign them
         </h2>
-        <p className="text-xs leading-relaxed text-label">
+        <p className="font-prose text-[13px] leading-relaxed text-label">
           The hands shown here come from my own recordings, which is also what the model was trained on. I’m not fluent
           in ASL, so if a letter isn’t registering, compare your hand to mine. For proper technique, you’re better off
           learning from a fluent signer or an ASL teacher.
         </p>
-        <p className="text-xs leading-relaxed text-label">
+        <p className="font-prose text-[13px] leading-relaxed text-label">
           ASL Drill reads one held handshape at a time. It’s meant for getting comfortable with the letters at your own
           pace, so fast, fluent fingerspelling might not register well.
         </p>

@@ -19,7 +19,7 @@ export function PersonalBests({ bests, sessionId, isLatest }: { bests: BestRun[]
   return (
     <Panel title="Personal bests" note="letters per min">
       {bests.length === 0 ? (
-        <p className="mt-2 text-xs text-label">None yet. Finish a session with {MIN_BEST_ACCURACY * 100}% accuracy to set one.</p>
+        <p className="mt-2 font-prose text-[13px] text-label">None yet. Finish a session with {MIN_BEST_ACCURACY * 100}% accuracy to set one.</p>
       ) : (
         <ol className="mt-2 flex flex-col">
           {bests.map((run, i) => {
@@ -38,7 +38,7 @@ export function PersonalBests({ bests, sessionId, isLatest }: { bests: BestRun[]
           })}
         </ol>
       )}
-      <p className="mt-2 px-1.5 text-xs leading-normal text-label">
+      <p className="mt-2 px-1.5 font-prose text-[13px] leading-normal text-label">
         Sessions under {MIN_BEST_ACCURACY * 100}% accuracy or with custom words don&apos;t count.
       </p>
     </Panel>
@@ -86,7 +86,7 @@ export function SlowestLetters({ letters }: { letters: SlowLetter[] }) {
         {letters.map((l) => (
           <li key={l.letter} className="grid grid-cols-[34px_1fr_auto] items-center gap-3">
             <Flap char={l.letter} size="sm" state="confirmed" animate={false} />
-            <span className="text-xs leading-normal text-label">
+            <span className="font-prose text-[13px] leading-normal text-label">
               {l.readAs ? (
                 <>
                   Often read as <b className="font-medium text-cream">{l.readAs}</b> first
@@ -107,13 +107,13 @@ export function MostMissed({ letters }: { letters: MissedLetter[] }) {
   return (
     <Panel title="Most missed">
       {letters.length === 0 ? (
-        <p className="mt-2 text-xs text-label">Nothing missed. Clean run.</p>
+        <p className="mt-2 font-prose text-[13px] text-label">Nothing missed. Clean run.</p>
       ) : (
         <ul className="mt-2 flex flex-col gap-2.5">
           {letters.map((m) => (
             <li key={m.letter} className="grid grid-cols-[34px_1fr_auto] items-center gap-3">
               <Flap char={m.letter} size="sm" state="missed" animate={false} />
-              <span className="text-xs leading-normal text-label">
+              <span className="font-prose text-[13px] leading-normal text-label">
                 {m.readAs ? (
                   <>
                     Read as <b className="font-medium text-cream">{m.readAs}</b> most often
