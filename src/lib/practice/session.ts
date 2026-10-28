@@ -41,7 +41,12 @@ export interface LetterResult {
   /** The wrong letter read most while on this one, if any. */
   readAs: string | null;
   skipped?: boolean;
+  /** How a passed letter was confirmed. Missing on sessions saved before it was recorded. */
+  confirmedBy?: Confirmation;
 }
+
+/** "hold": a held handshape (for the second of a double, one released and formed again). */
+export type Confirmation = "hold" | "slide" | "bounce" | "motion";
 
 export interface WordResult {
   word: string;
@@ -54,11 +59,14 @@ export interface SessionRecord {
   startedAt: string;
   endedAt: string;
   words: WordResult[];
+  /** Played from a fixed ?words= list, so it doesn't count toward personal bests. */
+  customWords?: true;
 }
 
 interface Playing {
   phase: "playing";
   id: string;
+  customWords: boolean;
   startedAt: string;
   words: string[];
   wordIndex: number;
@@ -83,7 +91,7 @@ interface Playing {
 export type PracticeState = { phase: "ready" } | Playing | { phase: "done"; record: SessionRecord };
 
 export type PracticeEvent =
-  | { type: "start"; now: number; id: string; startedAt: string; words: string[] }
+  | { type: "start"; now: number; id: string; startedAt: string; words: string[]; customWords?: boolean }
   | { type: "reading"; now: number; letter: string | null; hand: boolean }
   | { type: "motion"; now: number; motion: MotionEvent }
   | { type: "tick"; now: number; hidden: boolean; isoNow: string }
@@ -104,6 +112,7 @@ export function practiceReducer(
     return {
       phase: "playing",
       id: event.id,
+      customWords: event.customWords ?? false,
       startedAt: event.startedAt,
       words: event.words.map((w) => w.toUpperCase()),
       wordIndex: 0,
@@ -131,7 +140,7 @@ export function practiceReducer(
       const { state: hold, held } = stepHold(next.hold, event.letter, event.now, config.hold);
       next = { ...next, hold, reading: event.letter };
       const target = targetLetter(next);
-      if (held !== null && held === target && !MOTION_LETTERS.has(target)) return resolveLetter(next, "pass", event.now);
+      if (held !== null && held === target && !MOTION_LETTERS.has(target)) return resolveLetter(next, "pass", event.now, { confirmedBy: "hold" });
       return next;
     }
     case "motion": {
@@ -143,7 +152,8 @@ export function practiceReducer(
       const passes = MOTION_LETTERS.has(target)
         ? motion.kind === target
         : motion.kind === "double" && isRepeat(next);
-      return passes ? resolveLetter(next, "pass", event.now) : next;
+      if (!passes) return next;
+      return resolveLetter(next, "pass", event.now, { confirmedBy: motion.kind === "double" ? motion.style : "motion" });
     }
     case "tick": {
       const next = advanceClock({ ...state, hidden: event.hidden }, event.now, config);
@@ -154,7 +164,7 @@ export function practiceReducer(
     }
     case "skipLetter": {
       if (state.wordDoneAt !== null) return state;
-      return resolveLetter(advanceClock(state, event.now, config), "miss", event.now, true);
+      return resolveLetter(advanceClock(state, event.now, config), "miss", event.now, { skipped: true });
     }
     case "replaceWord": {
       if (state.wordDoneAt !== null) return state;
@@ -207,11 +217,17 @@ function resetLetter(state: Playing): Playing {
   return { ...state, letterActiveMs: 0, wrongMs: {}, hold: initialHoldState };
 }
 
-function resolveLetter(state: Playing, result: "pass" | "miss", now: number, skipped = false): Playing {
+function resolveLetter(
+  state: Playing,
+  result: "pass" | "miss",
+  now: number,
+  { skipped = false, confirmedBy }: { skipped?: boolean; confirmedBy?: Confirmation } = {},
+): Playing {
   const letter = targetLetter(state);
   if (letter === null) return state;
   const entry: LetterResult = { letter, result, activeMs: state.letterActiveMs, readAs: mostRead(state.wrongMs) };
   if (skipped) entry.skipped = true;
+  if (confirmedBy) entry.confirmedBy = confirmedBy;
   const current = [...state.current, entry];
   const wordDone = current.length >= (state.words[state.wordIndex]?.length ?? 0);
   // Keep a completed hold "fired" so continuing to hold the same handshape
@@ -225,7 +241,9 @@ function nextWord(state: Playing, isoNow: string): PracticeState {
   const word = state.words[state.wordIndex] ?? "";
   const done = [...state.done, { word, letters: state.current, activeMs: state.wordActiveMs }];
   if (state.wordIndex + 1 >= state.words.length) {
-    return { phase: "done", record: { id: state.id, startedAt: state.startedAt, endedAt: isoNow, words: done } };
+    const record: SessionRecord = { id: state.id, startedAt: state.startedAt, endedAt: isoNow, words: done };
+    if (state.customWords) record.customWords = true;
+    return { phase: "done", record };
   }
   return {
     ...state,

@@ -2,7 +2,7 @@
 // corrupted or older value never breaks the app. Kept to plain JSON so it can
 // move to accounts later (Phase 2).
 
-import type { LetterResult, SessionRecord, WordResult } from "./session";
+import type { Confirmation, LetterResult, SessionRecord, WordResult } from "./session";
 
 export const SESSIONS_STORAGE_KEY = "asl-drill:sessions";
 export const SESSIONS_VERSION = 1;
@@ -13,6 +13,8 @@ interface StoredSessions {
   sessions: SessionRecord[];
 }
 
+const CONFIRMATIONS = new Set<unknown>(["hold", "slide", "bounce", "motion"] satisfies Confirmation[]);
+
 const isString = (v: unknown): v is string => typeof v === "string";
 const isNumber = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
 
@@ -20,7 +22,8 @@ function isLetter(v: unknown): v is LetterResult {
   const l = v as Partial<LetterResult> | null;
   return (
     !!l && isString(l.letter) && (l.result === "pass" || l.result === "miss") && isNumber(l.activeMs) &&
-    (l.readAs === null || isString(l.readAs))
+    (l.readAs === null || isString(l.readAs)) &&
+    (l.confirmedBy === undefined || CONFIRMATIONS.has(l.confirmedBy))
   );
 }
 

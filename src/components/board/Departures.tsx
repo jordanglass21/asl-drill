@@ -4,6 +4,8 @@ export interface DepartureItem {
   unit?: string;
   /** Amber for highlighted values. */
   highlight?: boolean;
+  /** A small line under the value. */
+  sub?: React.ReactNode;
   /** Relative column width (default 1). */
   span?: number;
 }
@@ -23,6 +25,7 @@ export function Departures({ items }: { items: DepartureItem[] }) {
             {item.value}
             {item.unit && <small className="ml-1 text-xs text-label">{item.unit}</small>}
           </dd>
+          {item.sub && <dd className="mt-0.5 text-xs text-label">{item.sub}</dd>}
         </div>
       ))}
     </dl>

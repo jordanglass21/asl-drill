@@ -4,7 +4,7 @@ import { Flap } from "./Flap";
 interface Props {
   text: string;
   state?: FlapState;
-  size?: "lg" | "md" | "sm";
+  size?: "lg" | "md" | "sm" | "xs";
 }
 
 /** A short word spelled in flaps, e.g. a status code on an error screen. */
