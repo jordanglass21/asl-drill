@@ -1,3 +1,4 @@
+import { DEFAULT_HOLD_CONFIG } from "./hold";
 import { initialPracticeState, practiceReducer, type PracticeEvent, type PracticeState } from "./session";
 import { boardView } from "./view";
 
@@ -29,8 +30,9 @@ describe("boardView", () => {
   it("flags a confident wrong reading and fills the hold meter for the right one", () => {
     const start: PracticeEvent = { type: "start", now: 0, id: "s", startedAt: ISO, words: ["CAT"] };
     expect(boardView(play([start, reading(33, "S")]), 33)?.wrongReading).toBe("S");
-    const holding = play([start, reading(33, "C"), reading(66, "C"), reading(99, "C"), reading(132, "C"), reading(165, "C")]);
-    const view = boardView(holding, 183);
+    const half = DEFAULT_HOLD_CONFIG.holdMs / 2;
+    const holding = play([start, reading(10, "C"), reading(10 + half / 2, "C")]);
+    const view = boardView(holding, 10 + half);
     expect(view?.wrongReading).toBeNull();
     expect(view?.hold).toBeCloseTo(0.5, 1);
   });

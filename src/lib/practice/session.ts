@@ -61,6 +61,8 @@ export interface SessionRecord {
   words: WordResult[];
   /** Played from a fixed ?words= list, so it doesn't count toward personal bests. */
   customWords?: true;
+  /** The hold-to-confirm time it was played with. Missing on sessions from before 150 ms (they used 300). */
+  holdMs?: number;
 }
 
 interface Playing {
@@ -158,7 +160,7 @@ export function practiceReducer(
     case "tick": {
       const next = advanceClock({ ...state, hidden: event.hidden }, event.now, config);
       if (next.wordDoneAt !== null && event.now - next.wordDoneAt >= config.wordPauseMs) {
-        return nextWord(next, event.isoNow);
+        return nextWord(next, event.isoNow, config.hold.holdMs);
       }
       return next;
     }
@@ -237,11 +239,11 @@ function resolveLetter(
   return { ...resetLetter(state), hold, current, wordDoneAt: wordDone ? now : null };
 }
 
-function nextWord(state: Playing, isoNow: string): PracticeState {
+function nextWord(state: Playing, isoNow: string, holdMs: number): PracticeState {
   const word = state.words[state.wordIndex] ?? "";
   const done = [...state.done, { word, letters: state.current, activeMs: state.wordActiveMs }];
   if (state.wordIndex + 1 >= state.words.length) {
-    const record: SessionRecord = { id: state.id, startedAt: state.startedAt, endedAt: isoNow, words: done };
+    const record: SessionRecord = { id: state.id, startedAt: state.startedAt, endedAt: isoNow, words: done, holdMs };
     if (state.customWords) record.customWords = true;
     return { phase: "done", record };
   }

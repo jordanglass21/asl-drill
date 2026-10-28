@@ -7,7 +7,10 @@ export interface HoldConfig {
   graceMs: number;
 }
 
-export const DEFAULT_HOLD_CONFIG: HoldConfig = { holdMs: 300, graceMs: 120 };
+// 150 ms: none of our correctly signed recordings confirms a wrong letter
+// even this quickly, and slower signers hold longer than this anyway, so a
+// short hold mostly lifts the speed limit for faster hands. Was 300 ms.
+export const DEFAULT_HOLD_CONFIG: HoldConfig = { holdMs: 150, graceMs: 120 };
 
 export interface HoldState {
   /** The letter currently being held, if any. */

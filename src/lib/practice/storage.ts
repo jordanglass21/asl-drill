@@ -34,7 +34,10 @@ function isWord(v: unknown): v is WordResult {
 
 function isSession(v: unknown): v is SessionRecord {
   const s = v as Partial<SessionRecord> | null;
-  return !!s && isString(s.id) && isString(s.startedAt) && isString(s.endedAt) && Array.isArray(s.words) && s.words.every(isWord);
+  return (
+    !!s && isString(s.id) && isString(s.startedAt) && isString(s.endedAt) && Array.isArray(s.words) &&
+    s.words.every(isWord) && (s.holdMs === undefined || isNumber(s.holdMs))
+  );
 }
 
 /** Parses stored history, dropping anything malformed. Newest last. */
