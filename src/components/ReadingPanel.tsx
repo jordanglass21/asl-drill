@@ -6,7 +6,7 @@ interface Props {
   status: "loading" | "ready" | "error";
   reading: LiveReading | null;
   threshold: number | null;
-  /** A J, Z, or double just detected, shown briefly in place of the reading. */
+  /** A J or Z just detected, shown briefly in place of the reading. Doubles have their own panel. */
   motion?: MotionEvent | null;
 }
 
@@ -22,11 +22,7 @@ export function ReadingPanel({ status, reading, threshold, motion = null }: Prop
         <div aria-live="polite" aria-label={reading?.letter ? `Reading ${reading.letter}` : "No letter"}>
           <Flap char={letter} state={motionLetter ? "confirmed" : reading?.letter ? "current" : "pending"} size="md" animate={false} />
         </div>
-        {motion && (
-          <p className="mt-1.5 font-prose text-[13px] text-amber">
-            {motion.kind === "double" ? `double letter, ${motion.style}` : `${motion.kind}, motion`}
-          </p>
-        )}
+        {motionLetter && <p className="mt-1.5 font-prose text-[13px] text-amber">{motionLetter}, motion</p>}
       </div>
       <div>
         <div className="relative h-1 overflow-hidden rounded-sm bg-amber-dim" aria-hidden>
@@ -43,8 +39,7 @@ export function ReadingPanel({ status, reading, threshold, motion = null }: Prop
         </p>
       </div>
       <p className="font-prose text-xs leading-relaxed text-label">
-        Trace J or Z, or slide or bounce a letter, to see it detected. Dim means below the{" "}
-        {threshold !== null ? `${Math.round(threshold * 100)}% ` : ""}threshold.
+        Sign a letter and check that it reads correctly.
       </p>
     </aside>
   );

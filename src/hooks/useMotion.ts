@@ -19,7 +19,8 @@ export function useMotion() {
     [],
   );
 
-  const onFrame = useCallback((frame: TrackedFrame) => {
+  /** Steps the detector and returns the events this frame completed. */
+  const onFrame = useCallback((frame: TrackedFrame): MotionEvent[] => {
     const step = stepMotion(
       stateRef.current,
       frame.hand && frame.height > 0
@@ -28,10 +29,11 @@ export function useMotion() {
     );
     stateRef.current = step.state;
     const event = step.events.at(-1);
-    if (!event) return;
+    if (!event) return step.events;
     setLast(event);
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => setLast(null), SHOW_MS);
+    return step.events;
   }, []);
 
   return { last, onFrame };
