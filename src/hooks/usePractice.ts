@@ -6,7 +6,8 @@ import { readHand } from "@/lib/classifier/live";
 import type { LetterModel } from "@/lib/classifier/model";
 import { initialMotionState, stepMotion, type MotionState } from "@/lib/motion/detector";
 import { initialPracticeState, practiceReducer, type PracticeEvent, type PracticeState } from "@/lib/practice/session";
-import { saveSession } from "@/lib/practice/storage";
+import { saveBests } from "@/lib/practice/records";
+import { loadSessions, saveSession } from "@/lib/practice/storage";
 import { boardView } from "@/lib/practice/view";
 import { pickWords, playableWords } from "@/lib/practice/words";
 import type { TrackedFrame } from "./useHandTracking";
@@ -78,6 +79,7 @@ export function usePractice({
       id: crypto.randomUUID(),
       startedAt: new Date().toISOString(),
       words: words ?? pickWords(playableWords(), WORDS_PER_SESSION),
+      customWords: !!words,
     });
   }, [canStart, words]);
 
@@ -117,7 +119,9 @@ export function usePractice({
   // Save and show results when the session ends.
   useEffect(() => {
     if (state.phase !== "done") return;
-    saveSession(localStorageOrUndefined(), state.record);
+    const storage = localStorageOrUndefined();
+    saveSession(storage, state.record);
+    saveBests(storage, loadSessions(storage));
     router.push(`/results?id=${encodeURIComponent(state.record.id)}`);
   }, [state, router]);
 

@@ -45,6 +45,18 @@ describe("session storage", () => {
     expect(parseSessions(raw).map((s) => s.id)).toEqual(["good"]);
   });
 
+  it("keeps how letters were confirmed, and drops a session with an unknown value", () => {
+    const letter = (confirmedBy: string) => ({ letter: "C", result: "pass", activeMs: 1, readAs: null, confirmedBy });
+    const withVia = (id: string, confirmedBy: string) => ({
+      ...session(id),
+      words: [{ word: "C", activeMs: 1, letters: [letter(confirmedBy)] }],
+    });
+    const raw = JSON.stringify({ version: 1, sessions: [withVia("ok", "slide"), withVia("bad", "teleport")] });
+    const parsed = parseSessions(raw);
+    expect(parsed.map((s) => s.id)).toEqual(["ok"]);
+    expect(parsed[0]?.words[0]?.letters[0]?.confirmedBy).toBe("slide");
+  });
+
   it("survives blocked storage", () => {
     const blocked = {
       getItem: () => {

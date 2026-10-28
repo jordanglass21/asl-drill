@@ -114,6 +114,14 @@ describe("practiceReducer", () => {
     expect(record.words.map((w) => w.word)).toEqual(["CAT", "DOG"]);
     expect(record.words[1]?.letters.map((l) => l.result)).toEqual(["pass", "miss", "pass"]);
     expect(record.words[1]?.letters[1]?.readAs).toBe("Q");
+    expect(record.words[1]?.letters.map((l) => l.confirmedBy)).toEqual(["hold", undefined, "hold"]);
+    expect(record.customWords).toBeUndefined();
+  });
+
+  it("marks a session played from a custom word list", () => {
+    const sim = new Sim().send({ type: "start", now: 0, id: "s1", startedAt: ISO, words: ["CAT"], customWords: true });
+    sim.spell("CAT").pause();
+    expect(sim.state.phase === "done" && sim.state.record.customWords).toBe(true);
   });
 
   it("ignores events before starting and after finishing", () => {
@@ -142,12 +150,14 @@ describe("motion letters and doubles", () => {
   const Z: MotionEvent = { kind: "Z" };
   const slide: MotionEvent = { kind: "double", style: "slide" };
   const results = (sim: Sim) => sim.playing.current.map((l) => `${l.letter}:${l.result}`);
+  const via = (sim: Sim) => sim.playing.current.map((l) => l.confirmedBy);
 
   it("passes J and Z on their motion, not on a hold", () => {
     const sim = new Sim().start(["JAZ"]).show("I", 1000);
     expect(sim.playing.current).toEqual([]); // holding I never counts as J
     sim.motion(J).show("A", 400).show(null, 100).motion(Z);
     expect(results(sim)).toEqual(["J:pass", "A:pass", "Z:pass"]);
+    expect(via(sim)).toEqual(["motion", "hold", "motion"]);
   });
 
   it("ignores the wrong motion for the target", () => {
@@ -163,11 +173,15 @@ describe("motion letters and doubles", () => {
   it("confirms the second of a double on a slide or bounce", () => {
     const sim = new Sim().start(["BOOK"]).spell("B").show("O", 600).motion(slide);
     expect(results(sim)).toEqual(["B:pass", "O:pass", "O:pass"]);
+    expect(via(sim)).toEqual(["hold", "hold", "slide"]);
+    const bounced = new Sim().start(["BOOK"]).spell("B").show("O", 600).motion({ kind: "double", style: "bounce" });
+    expect(via(bounced).at(-1)).toBe("bounce");
   });
 
   it("confirms the second of a double after releasing and re-forming it", () => {
     const sim = new Sim().start(["BOOK"]).spell("B").show("O", 600).show(null, 300).show("O", 400);
     expect(results(sim)).toEqual(["B:pass", "O:pass", "O:pass"]);
+    expect(via(sim).at(-1)).toBe("hold");
   });
 
   it("ignores a double motion when the target isn't a repeat", () => {
