@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Big_Shoulders, IBM_Plex_Mono, IBM_Plex_Sans_Condensed } from "next/font/google";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -37,6 +38,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <SiteHeader />
           {children}
         </div>
+        {/* Cookieless visit counts in the Vercel dashboard; it never sees the camera or session data. */}
+        <Analytics />
       </body>
     </html>
   );
