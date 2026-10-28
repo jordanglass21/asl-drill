@@ -1,15 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import { useHandCamera } from "@/hooks/useHandCamera";
 import { useHandednessSetting } from "@/hooks/useHandednessSetting";
 import { useCallback } from "react";
 import type { TrackedFrame } from "@/hooks/useHandTracking";
 import { useLetterReading } from "@/hooks/useLetterReading";
 import { useMotion } from "@/hooks/useMotion";
+import { useDoubleCheck } from "@/hooks/useDoubleCheck";
 import { trackingReadout } from "@/lib/hands/readout";
 import { CameraStage } from "./CameraStage";
 import { Departures } from "./board/Departures";
+import { DoublePanel } from "./DoublePanel";
 import { KeyHints } from "./board/KeyHints";
 import { HandednessToggle } from "./HandednessToggle";
 import { ReadingPanel } from "./ReadingPanel";
@@ -18,14 +19,17 @@ export function CameraCheck() {
   const [handedness, setHandedness] = useHandednessSetting();
   const letters = useLetterReading();
   const motion = useMotion();
+  const doubles = useDoubleCheck();
   const { onFrame: lettersFrame } = letters;
   const { onFrame: motionFrame } = motion;
+  const { onFrame: doublesFrame } = doubles;
   const onFrame = useCallback(
     (frame: TrackedFrame) => {
-      lettersFrame(frame);
-      motionFrame(frame);
+      const reading = lettersFrame(frame);
+      const events = motionFrame(frame);
+      doublesFrame(frame.now, reading?.letter ?? null, events);
     },
-    [lettersFrame, motionFrame],
+    [lettersFrame, motionFrame, doublesFrame],
   );
   const { cameraState, videoRef, canvasRef, start, tracking } = useHandCamera({ setting: handedness, onFrame });
   const reading = letters.reading;
@@ -54,13 +58,13 @@ export function CameraCheck() {
           onStart={start}
           tag={trackingReadout(tracking, handedness)}
         />
-        <ReadingPanel status={letters.status} reading={reading} threshold={letters.threshold} motion={motion.last} />
+        <div className="flex flex-col gap-2.5">
+          <ReadingPanel status={letters.status} reading={reading} threshold={letters.threshold} motion={motion.last} />
+          <DoublePanel double={doubles.double} />
+        </div>
       </div>
-      <KeyHints hints={[{ text: "Hold up a handshape to read it" }, { text: "Readings aren't saved" }]}>
-        <Link href="/record" className="label hover:!text-amber">
-          Record training samples →
-        </Link>
-      </KeyHints>
+      {/* The recorder stays at /record but isn't linked, so testers don't wander into it. */}
+      <KeyHints hints={[{ text: "Hold up a handshape to read it" }, { text: "Readings aren't saved" }]} />
     </>
   );
 }

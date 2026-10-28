@@ -45,14 +45,16 @@ export function useLetterReading() {
     };
   }, []);
 
-  const onFrame = useCallback((frame: TrackedFrame) => {
+  /** Reads the frame and returns the reading, or null before the model loads. */
+  const onFrame = useCallback((frame: TrackedFrame): LiveReading | null => {
     const loaded = modelRef.current;
-    if (!loaded) return;
+    if (!loaded) return null;
     const next = frame.hand ? readHand(loaded, frame.hand, frame.width, frame.height) : null;
     if (readingChanged(lastRef.current, next)) {
       lastRef.current = next;
       setReading(next);
     }
+    return next;
   }, []);
 
   return {
