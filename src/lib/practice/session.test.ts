@@ -116,6 +116,7 @@ describe("practiceReducer", () => {
     expect(record.words[1]?.letters[1]?.readAs).toBe("Q");
     expect(record.words[1]?.letters.map((l) => l.confirmedBy)).toEqual(["hold", undefined, "hold"]);
     expect(record.customWords).toBeUndefined();
+    expect(record.holdMs).toBe(config.hold.holdMs);
   });
 
   it("marks a session played from a custom word list", () => {

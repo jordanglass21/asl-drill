@@ -45,6 +45,11 @@ describe("session storage", () => {
     expect(parseSessions(raw).map((s) => s.id)).toEqual(["good"]);
   });
 
+  it("keeps a session's hold time and drops a malformed one", () => {
+    const raw = JSON.stringify({ version: 1, sessions: [{ ...session("ok"), holdMs: 200 }, { ...session("bad"), holdMs: "fast" }] });
+    expect(parseSessions(raw).map((s) => [s.id, s.holdMs])).toEqual([["ok", 200]]);
+  });
+
   it("keeps how letters were confirmed, and drops a session with an unknown value", () => {
     const letter = (confirmedBy: string) => ({ letter: "C", result: "pass", activeMs: 1, readAs: null, confirmedBy });
     const withVia = (id: string, confirmedBy: string) => ({

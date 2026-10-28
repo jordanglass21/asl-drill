@@ -16,6 +16,10 @@ export function AlphabetReference() {
           ASL. If a letter won&apos;t register, compare your hand to mine and adjust. For proper technique, learn from a
           fluent signer or an ASL teacher.
         </p>
+        <p className="text-xs leading-relaxed text-label">
+          ASL Drill reads one held handshape at a time, so it&apos;s built for getting comfortable with the handshapes at
+          a steady pace. Fast, fluent fingerspelling may not register reliably.
+        </p>
       </div>
 
       <ul className="grid grid-cols-4 gap-2 sm:grid-cols-7 sm:gap-2.5">

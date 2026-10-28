@@ -55,7 +55,7 @@ The normalization must behave identically in Python (training) and TypeScript (t
 
 **Training data.** Start with the Hugging Face dataset `sid220/asl-now-fingerspelling` (MIT-licensed, captured with the same MediaPipe web hand landmarker; confirm license and format before use). Supplement it with our own recordings via a `/record` page. Raw datasets are not committed to git.
 
-**Letter confirmation.** A letter counts once the same prediction stays above the confidence threshold for a short hold (start around 300 ms; keep this configurable). This logic should be a pure, well-tested state machine separate from the UI.
+**Letter confirmation.** A letter counts once the same prediction stays above the confidence threshold for a short hold (started at 300 ms, tuned down to 150 ms; keep this configurable). This logic should be a pure, well-tested state machine separate from the UI.
 
 **Motion detector (J, Z, double letters).** Keep a rolling buffer of about one second of normalized landmarks. Recognize the starting handshape with the static classifier, then check the fingertip's path over the buffer:
 - **J:** I-handshape, with the pinky tip tracing a hook
