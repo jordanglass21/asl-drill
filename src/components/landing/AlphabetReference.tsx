@@ -12,13 +12,13 @@ export function AlphabetReference() {
           How I sign them
         </h2>
         <p className="text-xs leading-relaxed text-label">
-          These hands are drawn from my own recordings, the same data the model learned from. I&apos;m not fluent in
-          ASL. If a letter won&apos;t register, compare your hand to mine and adjust. For proper technique, learn from a
-          fluent signer or an ASL teacher.
+          The hands shown here come from my own recordings, which is also what the model was trained on. I’m not fluent
+          in ASL, so if a letter isn’t registering, compare your hand to mine. For proper technique, you’re better off
+          learning from a fluent signer or an ASL teacher.
         </p>
         <p className="text-xs leading-relaxed text-label">
-          ASL Drill reads one held handshape at a time, so it&apos;s built for getting comfortable with the handshapes at
-          a steady pace. Fast, fluent fingerspelling may not register reliably.
+          ASL Drill reads one held handshape at a time. It’s meant for getting comfortable with the letters at your own
+          pace, so fast, fluent fingerspelling might not register well.
         </p>
       </div>
 
