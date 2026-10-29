@@ -81,7 +81,7 @@ export function Feedback() {
       <div className="flex flex-col items-center gap-2.5 pt-4 pb-1 text-center">
         <FlapWord text="FEEDBACK" state="confirmed" size="sm" />
         <p className="max-w-md font-prose text-[13px] leading-relaxed text-label">
-          Five quick questions, about 30 seconds. Answers are anonymous and go to a Google Form, so I can see what to fix next.
+          Answers are anonymous and go to a Google Form, so I can see what to fix next.
         </p>
       </div>
 
