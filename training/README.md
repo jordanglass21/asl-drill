@@ -54,7 +54,7 @@ uv run --group render python scripts/render_alphabet.py
 ```
 
 Draws the landing page's 26 reference hands from your recordings (skipping
-excluded takes) into `public/reference/alphabet-v2/`. After a retrain that
+excluded takes) into `public/reference/alphabet-v3/`. After a retrain that
 changes the poses, write to a new folder and update `ALPHABET_REFERENCE_DIR`,
 since those files are cached as immutable.
 
