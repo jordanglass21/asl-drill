@@ -35,7 +35,7 @@ export function Landing() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [router]);
 
-  const headline = (size: "lg" | "md") =>
+  const headline = (size: "lg" | "sm") =>
     [...HEADLINE].map((ch, i) =>
       ch === " " ? (
         <span key={i} className={size === "lg" ? "w-6" : "w-3"} />
@@ -52,7 +52,7 @@ export function Landing() {
           {headline("lg")}
         </div>
         <div className="flex gap-1.5 sm:hidden" aria-hidden>
-          {headline("md")}
+          {headline("sm")}
         </div>
 
         <div className="flex max-w-xl flex-col items-center gap-2.5">

@@ -98,6 +98,10 @@ body {
 .flap[data-size="sm"] { --flap-w: 34px; --flap-h: 48px; --flap-font: 42px; --flap-radius: 4px; }
 .flap[data-size="xs"] { --flap-w: 18px; --flap-h: 25px; --flap-font: 22px; --flap-radius: 3px; }
 .flap[data-size="xs"]::before { display: none; }
+/* Phones: the large board steps down to the medium flap so a word (up to 6 letters) fits the width. */
+@media (max-width: 639px) {
+  .flap[data-size="lg"] { --flap-w: 52px; --flap-h: 74px; --flap-font: 64px; --flap-radius: 5px; }
+}
 
 .flap[data-state="current"] { --flap-color: var(--cream); --flap-face: var(--flap-lit); --flap-face-top: var(--flap-lit-top); }
 .flap[data-state="confirmed"] { --flap-color: var(--amber); }
