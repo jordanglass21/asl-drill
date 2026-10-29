@@ -144,7 +144,11 @@ export function Feedback() {
             <Question n={4} title="How much ASL do you know?">
               <Choices options={EXPERIENCE_CHOICES} value={answers.experience} onChange={(experience) => update({ experience })} />
             </Question>
-            <Question n={5} title="Anything that didn't work well, or that you'd add?">
+            <Question
+              n={5}
+              title="Anything that didn't work well, or that you'd add?"
+              note="Negative and constructive feedback is encouraged. Please be as specific as possible."
+            >
               <textarea
                 aria-label="Anything that didn't work well, or that you'd add?"
                 value={answers.notes}
