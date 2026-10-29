@@ -13,11 +13,11 @@ const LINKS = [
 export function SiteHeader() {
   const pathname = usePathname();
   return (
-    <header className="flex items-baseline justify-between border-b border-rail pb-2.5">
-      <Link href="/" className="font-display text-[22px] font-extrabold uppercase tracking-[0.06em] text-cream">
+    <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-rail pb-2.5">
+      <Link href="/" className="font-display text-xl font-extrabold uppercase tracking-[0.06em] text-cream sm:text-[22px]">
         ASL <span className="text-amber">Drill</span>
       </Link>
-      <nav className="flex gap-5 signage text-base">
+      <nav className="flex gap-3 signage text-sm sm:gap-5 sm:text-base">
         {LINKS.map(({ href, label }) => (
           <Link
             key={href}
