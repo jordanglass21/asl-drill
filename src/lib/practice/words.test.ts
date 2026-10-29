@@ -1,4 +1,13 @@
-import { hasDoubleLetter, needsMotion, parseWordList, pickWords, playableWords, seededRandom, WORDS } from "./words";
+import {
+  hasDoubleLetter,
+  needsMotion,
+  parseWordList,
+  pickSessionWords,
+  pickWords,
+  playableWords,
+  seededRandom,
+  WORDS,
+} from "./words";
 
 describe("word list", () => {
   it("has a few hundred unique, uppercase, 3–7 letter words", () => {
@@ -43,6 +52,28 @@ describe("pickWords", () => {
 
   it("avoids excluded words", () => {
     expect(pickWords(pool, 5, seededRandom(3), ["ONE", "TWO"]).sort()).toEqual(["CAR", "SIX", "TEN"]);
+  });
+});
+
+describe("pickSessionWords", () => {
+  it("always includes exactly one double-letter word", () => {
+    for (let seed = 0; seed < 200; seed++) {
+      const words = pickSessionWords(playableWords(), 10, seededRandom(seed));
+      expect(words).toHaveLength(10);
+      expect(new Set(words).size).toBe(10);
+      expect(words.filter(hasDoubleLetter)).toHaveLength(1);
+    }
+  });
+
+  it("doesn't always put the double in the same place", () => {
+    const places = new Set(
+      Array.from({ length: 50 }, (_, seed) => pickSessionWords(playableWords(), 10, seededRandom(seed)).findIndex(hasDoubleLetter)),
+    );
+    expect(places.size).toBeGreaterThan(3);
+  });
+
+  it("falls back to a plain pick when the pool has no doubles", () => {
+    expect(pickSessionWords(["CAT", "DOG", "SUN"], 2, seededRandom(1))).toHaveLength(2);
   });
 });
 

@@ -9,7 +9,7 @@ import { initialPracticeState, practiceReducer, type PracticeEvent, type Practic
 import { saveBests } from "@/lib/practice/records";
 import { loadSessions, saveSession } from "@/lib/practice/storage";
 import { boardView } from "@/lib/practice/view";
-import { pickWords, playableWords } from "@/lib/practice/words";
+import { pickSessionWords, pickWords, playableWords } from "@/lib/practice/words";
 import type { TrackedFrame } from "./useHandTracking";
 
 export const WORDS_PER_SESSION = 10;
@@ -78,7 +78,7 @@ export function usePractice({
       now: performance.now(),
       id: crypto.randomUUID(),
       startedAt: new Date().toISOString(),
-      words: words ?? pickWords(playableWords(), WORDS_PER_SESSION),
+      words: words ?? pickSessionWords(playableWords(), WORDS_PER_SESSION),
       customWords: !!words,
     });
   }, [canStart, words]);
