@@ -5,7 +5,7 @@ Run from training/: uv run --group render python scripts/render_alphabet.py
 For each letter it picks the most typical confident frame (J and Z: a
 typical take's start frame plus the fingertip's path), fleshes the 21
 landmarks out into a pencil-style hand, and writes one image per letter to
-public/reference/alphabet-v1/. Rerun after retraining; bump the folder name
+public/reference/alphabet-v2/. Rerun after retraining; bump the folder name
 if the images change, since public files are cached as immutable.
 """
 
@@ -30,7 +30,7 @@ from asl_drill.recordings import load_recording
 TRAINING = Path(__file__).resolve().parents[1]
 ROOT = TRAINING.parent
 MODEL_PATH = ROOT / "public" / "models" / "letters-v4.json"
-OUT_DIR = ROOT / "public" / "reference" / "alphabet-v1"
+OUT_DIR = ROOT / "public" / "reference" / "alphabet-v2"
 LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 # Board palette (src/app/globals.css).
@@ -43,6 +43,12 @@ DEFAULT_VIEW = (35, 25)
 VIEWS = {"P": (90, -20), "Q": (-60, -20)}
 # Motion letters: (handshape the take starts in, landmark whose path is drawn).
 MOTION = {"J": ("I", 20), "Z": ("D", 8)}
+
+# Letters whose thumb crosses in front of the curled fingers. MediaPipe's depth
+# puts S's curled fingertips nearer the camera than its thumb, so ordering by
+# depth alone draws the thumb tucked underneath.
+THUMB_IN_FRONT = {"S"}
+THUMB = {(1, 2), (2, 3), (3, 4)}
 
 PALM = [0, 1, 5, 9, 13, 17]
 # (joint a, joint b, radius at a, radius at b), radii in wrist-to-middle-knuckle lengths.
@@ -159,7 +165,7 @@ def tone(nearness: float):
     return tuple(far + (near - far) * nearness)
 
 
-def draw_hand(ax, hand: np.ndarray, path: np.ndarray | None) -> None:
+def draw_hand(ax, hand: np.ndarray, path: np.ndarray | None, thumb_in_front: bool = False) -> None:
     s = np.linalg.norm(hand[9] - hand[0])
     xy, z = hand[:, :2], hand[:, 2]
     near = (z.max() - z) / max(z.max() - z.min(), 1e-6)
@@ -169,7 +175,8 @@ def draw_hand(ax, hand: np.ndarray, path: np.ndarray | None) -> None:
 
     parts: list[tuple[object, float]] = [("palm", float(z[PALM].mean()))]
     parts += [(seg, float(z[seg[0]] + z[seg[1]]) / 2) for seg in SEGMENTS]
-    for i, (part, _) in enumerate(sorted(parts, key=lambda p: -p[1])):  # far parts first
+    in_front = lambda part: thumb_in_front and part != "palm" and tuple(part[:2]) in THUMB
+    for i, (part, _) in enumerate(sorted(parts, key=lambda p: (in_front(p[0]), -p[1]))):  # far parts first
         zo = 2 + i
         if part == "palm":
             pieces = [xy[PALM]] + [capsule(xy[a], xy[b], 0.16 * s, 0.16 * s) for a, b in zip(PALM, PALM[1:] + PALM[:1])]
@@ -205,7 +212,7 @@ def main() -> None:
         hand, path = motion_pose(model, takes, letter) if letter in MOTION else (static_pose(model, takes, letter), None)
         fig = plt.figure(figsize=(2.2, 2.2))
         ax = fig.add_axes((0, 0, 1, 1))
-        draw_hand(ax, hand, path)
+        draw_hand(ax, hand, path, thumb_in_front=letter in THUMB_IN_FRONT)
         out = OUT_DIR / f"{letter}.webp"
         fig.savefig(out, dpi=150, transparent=True)
         plt.close(fig)
