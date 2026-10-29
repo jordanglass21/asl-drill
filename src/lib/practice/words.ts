@@ -1,5 +1,5 @@
 // The practice word list: common English words, 3–7 letters, including words
-// with J and Z (confirmed by motion) and double letters (slide or bounce).
+// with J and Z (confirmed by motion) and double letters (slide, bounce, or re-sign).
 
 const WORD_LIST = `
 able about above actor adult after again agent agree ahead alarm album alert alive allow alone along alter angel anger
