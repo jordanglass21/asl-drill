@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/play", label: "Play" },
   { href: "/camera", label: "Camera" },
   { href: "/results", label: "Results" },
+  { href: "/feedback", label: "Feedback" },
 ] as const;
 
 export function SiteHeader() {
