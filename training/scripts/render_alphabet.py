@@ -5,7 +5,7 @@ Run from training/: uv run --group render python scripts/render_alphabet.py
 For each letter it picks the most typical confident frame (J and Z: a
 typical take's start frame plus the fingertip's path), fleshes the 21
 landmarks out into a pencil-style hand, and writes one image per letter to
-public/reference/alphabet-v2/. Rerun after retraining; bump the folder name
+public/reference/alphabet-v3/. Rerun after retraining; bump the folder name
 if the images change, since public files are cached as immutable.
 """
 
@@ -30,7 +30,7 @@ from asl_drill.recordings import load_recording
 TRAINING = Path(__file__).resolve().parents[1]
 ROOT = TRAINING.parent
 MODEL_PATH = ROOT / "public" / "models" / "letters-v4.json"
-OUT_DIR = ROOT / "public" / "reference" / "alphabet-v2"
+OUT_DIR = ROOT / "public" / "reference" / "alphabet-v3"
 LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 # Board palette (src/app/globals.css).
@@ -44,9 +44,11 @@ VIEWS = {"P": (90, -20), "Q": (-60, -20)}
 # Motion letters: (handshape the take starts in, landmark whose path is drawn).
 MOTION = {"J": ("I", 20), "Z": ("D", 8)}
 
-# Letters whose thumb crosses in front of the curled fingers. MediaPipe's depth
-# puts S's curled fingertips nearer the camera than its thumb, so ordering by
-# depth alone draws the thumb tucked underneath.
+# Fists whose curled fingers sit in front of the palm, with the thumb across
+# them. MediaPipe's depth puts S's ring and pinky behind its palm and its
+# fingertips nearer than its thumb, so ordering by depth alone hides the
+# pinky and tucks the thumb underneath. These letters draw the palm first and
+# the thumb last.
 THUMB_IN_FRONT = {"S"}
 THUMB = {(1, 2), (2, 3), (3, 4)}
 
@@ -175,8 +177,14 @@ def draw_hand(ax, hand: np.ndarray, path: np.ndarray | None, thumb_in_front: boo
 
     parts: list[tuple[object, float]] = [("palm", float(z[PALM].mean()))]
     parts += [(seg, float(z[seg[0]] + z[seg[1]]) / 2) for seg in SEGMENTS]
-    in_front = lambda part: thumb_in_front and part != "palm" and tuple(part[:2]) in THUMB
-    for i, (part, _) in enumerate(sorted(parts, key=lambda p: (in_front(p[0]), -p[1]))):  # far parts first
+    def layer(part) -> int:
+        if not thumb_in_front:
+            return 0
+        if part == "palm":
+            return -1
+        return 1 if tuple(part[:2]) in THUMB else 0
+
+    for i, (part, _) in enumerate(sorted(parts, key=lambda p: (layer(p[0]), -p[1]))):  # far parts first
         zo = 2 + i
         if part == "palm":
             pieces = [xy[PALM]] + [capsule(xy[a], xy[b], 0.16 * s, 0.16 * s) for a, b in zip(PALM, PALM[1:] + PALM[:1])]
