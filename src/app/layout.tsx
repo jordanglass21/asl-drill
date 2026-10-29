@@ -37,6 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <div className="flex w-full max-w-[1040px] flex-1 flex-col gap-3.5">
           <SiteHeader />
           {children}
+          <p className="pb-3 text-[11px] text-cream-dim">© 2026 Jordan Glass · Hand tracking by MediaPipe</p>
         </div>
         {/* Cookieless visit counts in the Vercel dashboard; it never sees the camera or session data. */}
         <Analytics />
