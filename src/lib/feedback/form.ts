@@ -11,7 +11,9 @@ export const FEEDBACK_FORM_ACTION =
 /** Field ids from the form's pre-filled link. */
 const FIELDS = {
   letters: "entry.129497468",
-  doubles: "entry.204783588",
+  /** The two rows of the doubles grid. */
+  slide: "entry.973102069",
+  bounce: "entry.1391201748",
   speed: "entry.198617729",
   experience: "entry.186512009",
   notes: "entry.253944935",
@@ -19,20 +21,27 @@ const FIELDS = {
 
 export const NONE = "None";
 export const LETTER_CHOICES: readonly string[] = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"];
-export const DOUBLES_CHOICES = ["Usually", "Sometimes", "Rarely"] as const;
+/** The doubles grid: rows are the two ways to double a letter. */
+export const DOUBLE_METHODS = [
+  { key: "slide", label: "Slide sideways" },
+  { key: "bounce", label: "Bounce in place" },
+] as const;
+export const DOUBLE_RESULTS = ["Worked", "Didn't work", "Didn't try"] as const;
+export type DoubleResult = (typeof DOUBLE_RESULTS)[number];
 export const SPEED_CHOICES = ["Too slow", "About right", "Too fast"] as const;
 export const EXPERIENCE_CHOICES = ["New to it", "Some", "Fluent"] as const;
 
 export interface FeedbackAnswers {
   /** Trouble letters, or just NONE. */
   letters: string[];
-  doubles: (typeof DOUBLES_CHOICES)[number] | null;
+  slide: DoubleResult | null;
+  bounce: DoubleResult | null;
   speed: (typeof SPEED_CHOICES)[number] | null;
   experience: (typeof EXPERIENCE_CHOICES)[number] | null;
   notes: string;
 }
 
-export const emptyAnswers: FeedbackAnswers = { letters: [], doubles: null, speed: null, experience: null, notes: "" };
+export const emptyAnswers: FeedbackAnswers = { letters: [], slide: null, bounce: null, speed: null, experience: null, notes: "" };
 
 /** Toggles a letter, or NONE; NONE and letters rule each other out. */
 export function toggleLetter(letters: readonly string[], letter: string): string[] {
@@ -45,7 +54,8 @@ export function toggleLetter(letters: readonly string[], letter: string): string
 export function hasAnswers(answers: FeedbackAnswers): boolean {
   return (
     answers.letters.length > 0 ||
-    answers.doubles !== null ||
+    answers.slide !== null ||
+    answers.bounce !== null ||
     answers.speed !== null ||
     answers.experience !== null ||
     answers.notes.trim() !== ""
@@ -59,7 +69,8 @@ export function toFormBody(answers: FeedbackAnswers): URLSearchParams {
   for (const letter of [...answers.letters].sort((a, b) => order.indexOf(a) - order.indexOf(b))) {
     body.append(FIELDS.letters, letter);
   }
-  if (answers.doubles) body.append(FIELDS.doubles, answers.doubles);
+  if (answers.slide) body.append(FIELDS.slide, answers.slide);
+  if (answers.bounce) body.append(FIELDS.bounce, answers.bounce);
   if (answers.speed) body.append(FIELDS.speed, answers.speed);
   if (answers.experience) body.append(FIELDS.experience, answers.experience);
   const notes = answers.notes.trim();
