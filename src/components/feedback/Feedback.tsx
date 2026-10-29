@@ -132,7 +132,7 @@ export function Feedback() {
               <div className="flex flex-col gap-2">
                 {DOUBLE_METHODS.map(({ key, label }) => (
                   <div key={key} role="group" aria-label={label} className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                    <span className="w-28 font-prose text-[13px] text-label">{label}</span>
+                    <span className="w-14 font-prose text-[13px] text-label">{label}</span>
                     <Choices options={DOUBLE_RESULTS} value={answers[key]} onChange={(value) => update({ [key]: value })} />
                   </div>
                 ))}

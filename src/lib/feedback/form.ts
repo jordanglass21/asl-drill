@@ -11,7 +11,7 @@ export const FEEDBACK_FORM_ACTION =
 /** Field ids from the form's pre-filled link. */
 const FIELDS = {
   letters: "entry.129497468",
-  /** The two rows of the doubles grid. */
+  /** The two rows of the doubles grid (the form calls them "Slide sideways" and "Bounce in place"). */
   slide: "entry.973102069",
   bounce: "entry.1391201748",
   speed: "entry.198617729",
@@ -23,8 +23,8 @@ export const NONE = "None";
 export const LETTER_CHOICES: readonly string[] = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"];
 /** The doubles grid: rows are the two ways to double a letter. */
 export const DOUBLE_METHODS = [
-  { key: "slide", label: "Slide sideways" },
-  { key: "bounce", label: "Bounce in place" },
+  { key: "slide", label: "Slide" },
+  { key: "bounce", label: "Bounce" },
 ] as const;
 export const DOUBLE_RESULTS = ["Worked", "Didn't work", "Didn't try"] as const;
 export type DoubleResult = (typeof DOUBLE_RESULTS)[number];
