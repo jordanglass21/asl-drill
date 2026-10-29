@@ -73,6 +73,24 @@ export function pickWords(
   return candidates.slice(0, count);
 }
 
+/**
+ * A session's words: exactly one with a double letter (when the pool has
+ * any), the rest without, in random order. Left to chance, about 4 in 10
+ * sessions of 10 would have no double at all, so many players would never
+ * try one, and the luck of how many came up would skew letters per minute.
+ */
+export function pickSessionWords(pool: readonly string[], count: number, random: () => number = Math.random): string[] {
+  const doubles = pool.filter(hasDoubleLetter);
+  if (doubles.length === 0 || count <= 0) return pickWords(pool, count, random);
+  const [double] = pickWords(doubles, 1, random);
+  const rest = pickWords(
+    pool.filter((word) => !hasDoubleLetter(word)),
+    count - 1,
+    random,
+  );
+  return pickWords([double as string, ...rest], count, random);
+}
+
 /** Parses a `?words=` list (e.g. "jazz,book"); null when absent or invalid. */
 export function parseWordList(raw: string | null | undefined): string[] | null {
   if (!raw) return null;
