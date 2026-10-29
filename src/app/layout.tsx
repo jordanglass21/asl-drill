@@ -2,7 +2,7 @@ import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Big_Shoulders, IBM_Plex_Mono, IBM_Plex_Sans_Condensed } from "next/font/google";
 import { SiteHeader } from "@/components/SiteHeader";
-import { pageTitle } from "@/lib/site";
+import { pageTitle, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 // Big Shoulders is variable with an optical-size axis; large sizes get its display cut.
@@ -25,9 +25,14 @@ const plexSansCondensed = IBM_Plex_Sans_Condensed({
   weight: ["400", "500"],
 });
 
+// The icons and the link-preview image are files next to this layout
+// (icon.png, apple-icon.png, opengraph-image.png, twitter-image.png).
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: pageTitle(),
-  description: "Practice ASL fingerspelling with your webcam, right in the browser.",
+  description: SITE_DESCRIPTION,
+  openGraph: { type: "website", siteName: SITE_NAME, title: SITE_NAME, description: SITE_DESCRIPTION, url: "/" },
+  twitter: { card: "summary_large_image", title: SITE_NAME, description: SITE_DESCRIPTION },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
