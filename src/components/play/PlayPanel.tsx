@@ -40,7 +40,7 @@ export function PlayPanel({ reading, target, mode, wrongReading, hold, upcoming,
             ) : playing && mode === "motion" && target ? (
               <span className="text-amber">{MOTION_CUES[target]}</span>
             ) : playing && mode === "double" ? (
-              <span className="text-amber">slide or bounce it</span>
+              <span className="text-amber">slide, bounce, or sign it again</span>
             ) : playing && reading?.letter && reading.letter === target ? (
               <span className="text-amber">hold it</span>
             ) : null}
