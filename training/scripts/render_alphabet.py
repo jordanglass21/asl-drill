@@ -5,7 +5,7 @@ Run from training/: uv run --group render python scripts/render_alphabet.py
 For each letter it picks the most typical confident frame (J and Z: a
 typical take's start frame plus the fingertip's path), fleshes the 21
 landmarks out into a pencil-style hand, and writes one image per letter to
-public/reference/alphabet-v3/. Rerun after retraining; bump the folder name
+public/reference/alphabet-v4/. Rerun after retraining; bump the folder name
 if the images change, since public files are cached as immutable.
 """
 
@@ -30,7 +30,7 @@ from asl_drill.recordings import load_recording
 TRAINING = Path(__file__).resolve().parents[1]
 ROOT = TRAINING.parent
 MODEL_PATH = ROOT / "public" / "models" / "letters-v4.json"
-OUT_DIR = ROOT / "public" / "reference" / "alphabet-v3"
+OUT_DIR = ROOT / "public" / "reference" / "alphabet-v4"
 LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 # Board palette (src/app/globals.css).
@@ -40,17 +40,59 @@ FILL_FAR, FILL_NEAR = "#171614", "#2c2925"
 # Turned and tilted so curled fingers read; letters that point down at the
 # camera flatten from there, so they get side views instead.
 DEFAULT_VIEW = (35, 25)
-VIEWS = {"P": (90, -20), "Q": (-60, -20)}
+# M and N are fists: head-on, each curled finger reads as its own column.
+VIEWS = {"P": (90, -20), "Q": (-60, -20), "M": (0, 10), "N": (0, 10)}
 # Motion letters: (handshape the take starts in, landmark whose path is drawn).
 MOTION = {"J": ("I", 20), "Z": ("D", 8)}
 
-# Fists whose curled fingers sit in front of the palm, with the thumb across
-# them. MediaPipe's depth puts S's ring and pinky behind its palm and its
-# fingertips nearer than its thumb, so ordering by depth alone hides the
-# pinky and tucks the thumb underneath. These letters draw the palm first and
-# the thumb last.
-THUMB_IN_FRONT = {"S"}
-THUMB = {(1, 2), (2, 3), (3, 4)}
+# Per-letter drawing fixes. Parts are layered by MediaPipe's depth, which is
+# rough: in fists it puts curled fingers behind the palm, and it can't tell
+# which finger rests on which. These keep the recorded pose and only change
+# what's drawn on top, plus a small sideways spread where fingers overlap.
+#   palm_back: draw the palm before every finger (curled fingers in front).
+#   thumb_front: draw the thumb after every finger (thumb across the fist).
+#   over_thumb: fingers drawn over the thumb, which goes over the rest.
+#   spread: {finger: offset}, in hand sizes along the knuckle line (index to
+#     pinky), growing from nothing at the knuckle to the full offset at the tip.
+THUMB, INDEX, MIDDLE, RING, PINKY = range(5)
+FINGERS = {THUMB: (1, 2, 3, 4), INDEX: (5, 6, 7, 8), MIDDLE: (9, 10, 11, 12), RING: (13, 14, 15, 16), PINKY: (17, 18, 19, 20)}
+STYLES: dict[str, dict] = {
+    "A": {"palm_back": True},
+    "D": {"palm_back": True, "spread": {RING: 0.07, PINKY: 0.14}},
+    "E": {"palm_back": True},
+    "M": {"palm_back": True, "over_thumb": (INDEX, MIDDLE, RING)},
+    "N": {"palm_back": True, "over_thumb": (INDEX, MIDDLE)},
+    "O": {"spread": {INDEX: -0.05, MIDDLE: -0.017, RING: 0.017, PINKY: 0.05}},
+    "S": {"palm_back": True, "thumb_front": True},
+}
+
+
+def finger_of(joint: int) -> int:
+    return next(f for f, joints in FINGERS.items() if joint in joints)
+
+
+def spread(xy: np.ndarray, offsets: dict[int, float], s: float) -> np.ndarray:
+    """Fans fingers apart along the knuckle line, more toward the tips."""
+    out = xy.copy()
+    across = xy[17] - xy[5]
+    across = across / max(np.linalg.norm(across), 1e-9)
+    for finger, amount in offsets.items():
+        for step, joint in enumerate(FINGERS[finger][1:], start=1):
+            out[joint] += across * amount * s * step / 3
+    return out
+
+
+def layer(part, style: dict) -> int:
+    """Draw order class: lower draws first; ties fall back to depth."""
+    if part == "palm":
+        return -1 if style.get("palm_back") else 0
+    finger = finger_of(part[0])
+    if finger == THUMB:
+        if style.get("thumb_front"):
+            return 3
+        return 1 if style.get("over_thumb") else 0
+    return 2 if finger in style.get("over_thumb", ()) else 0
+
 
 PALM = [0, 1, 5, 9, 13, 17]
 # (joint a, joint b, radius at a, radius at b), radii in wrist-to-middle-knuckle lengths.
@@ -167,9 +209,12 @@ def tone(nearness: float):
     return tuple(far + (near - far) * nearness)
 
 
-def draw_hand(ax, hand: np.ndarray, path: np.ndarray | None, thumb_in_front: bool = False) -> None:
+def draw_hand(ax, hand: np.ndarray, path: np.ndarray | None, style: dict | None = None) -> None:
+    style = style or {}
     s = np.linalg.norm(hand[9] - hand[0])
     xy, z = hand[:, :2], hand[:, 2]
+    if "spread" in style:
+        xy = spread(xy, style["spread"], s)
     near = (z.max() - z) / max(z.max() - z.min(), 1e-6)
 
     away = (xy[0] - xy[9]) / max(np.linalg.norm(xy[0] - xy[9]), 1e-9)
@@ -177,14 +222,7 @@ def draw_hand(ax, hand: np.ndarray, path: np.ndarray | None, thumb_in_front: boo
 
     parts: list[tuple[object, float]] = [("palm", float(z[PALM].mean()))]
     parts += [(seg, float(z[seg[0]] + z[seg[1]]) / 2) for seg in SEGMENTS]
-    def layer(part) -> int:
-        if not thumb_in_front:
-            return 0
-        if part == "palm":
-            return -1
-        return 1 if tuple(part[:2]) in THUMB else 0
-
-    for i, (part, _) in enumerate(sorted(parts, key=lambda p: (layer(p[0]), -p[1]))):  # far parts first
+    for i, (part, _) in enumerate(sorted(parts, key=lambda p: (layer(p[0], style), -p[1]))):  # far parts first
         zo = 2 + i
         if part == "palm":
             pieces = [xy[PALM]] + [capsule(xy[a], xy[b], 0.16 * s, 0.16 * s) for a, b in zip(PALM, PALM[1:] + PALM[:1])]
@@ -220,7 +258,7 @@ def main() -> None:
         hand, path = motion_pose(model, takes, letter) if letter in MOTION else (static_pose(model, takes, letter), None)
         fig = plt.figure(figsize=(2.2, 2.2))
         ax = fig.add_axes((0, 0, 1, 1))
-        draw_hand(ax, hand, path, thumb_in_front=letter in THUMB_IN_FRONT)
+        draw_hand(ax, hand, path, STYLES.get(letter))
         out = OUT_DIR / f"{letter}.webp"
         fig.savefig(out, dpi=150, transparent=True)
         plt.close(fig)
