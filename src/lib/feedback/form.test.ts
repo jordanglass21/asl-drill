@@ -18,17 +18,26 @@ describe("hasAnswers", () => {
     expect(hasAnswers(emptyAnswers)).toBe(false);
     expect(hasAnswers({ ...emptyAnswers, notes: "   " })).toBe(false);
     expect(hasAnswers({ ...emptyAnswers, speed: "Too slow" })).toBe(true);
+    expect(hasAnswers({ ...emptyAnswers, bounce: "Didn't work" })).toBe(true);
     expect(hasAnswers({ ...emptyAnswers, letters: [NONE] })).toBe(true);
   });
 });
 
 describe("toFormBody", () => {
   it("sends each answer to its field, letters alphabetically", () => {
-    const body = toFormBody({ letters: ["T", "K"], doubles: "Sometimes", speed: "About right", experience: "Some", notes: " slow on M " });
+    const body = toFormBody({
+      letters: ["T", "K"],
+      slide: "Worked",
+      bounce: "Didn't try",
+      speed: "About right",
+      experience: "Some",
+      notes: " slow on M ",
+    });
     expect([...body]).toEqual([
       ["entry.129497468", "K"],
       ["entry.129497468", "T"],
-      ["entry.204783588", "Sometimes"],
+      ["entry.973102069", "Worked"],
+      ["entry.1391201748", "Didn't try"],
       ["entry.198617729", "About right"],
       ["entry.186512009", "Some"],
       ["entry.253944935", "slow on M"],

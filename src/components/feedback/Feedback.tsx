@@ -3,7 +3,8 @@
 import { useId, useState } from "react";
 import { useFeedback } from "@/hooks/useFeedback";
 import {
-  DOUBLES_CHOICES,
+  DOUBLE_METHODS,
+  DOUBLE_RESULTS,
   EXPERIENCE_CHOICES,
   FEEDBACK_EMAIL,
   LETTER_CHOICES,
@@ -128,7 +129,14 @@ export function Feedback() {
               </div>
             </Question>
             <Question n={2} title="Did double letters register? (the OO in BOOK)">
-              <Choices options={DOUBLES_CHOICES} value={answers.doubles} onChange={(doubles) => update({ doubles })} />
+              <div className="flex flex-col gap-2">
+                {DOUBLE_METHODS.map(({ key, label }) => (
+                  <div key={key} role="group" aria-label={label} className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                    <span className="w-28 font-prose text-[13px] text-label">{label}</span>
+                    <Choices options={DOUBLE_RESULTS} value={answers[key]} onChange={(value) => update({ [key]: value })} />
+                  </div>
+                ))}
+              </div>
             </Question>
             <Question n={3} title="How did the time to accept a letter feel?">
               <Choices options={SPEED_CHOICES} value={answers.speed} onChange={(speed) => update({ speed })} />
