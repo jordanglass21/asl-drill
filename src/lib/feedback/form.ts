@@ -29,7 +29,7 @@ export const DOUBLE_METHODS = [
 export const DOUBLE_RESULTS = ["Worked", "Didn't work", "Didn't try"] as const;
 export type DoubleResult = (typeof DOUBLE_RESULTS)[number];
 export const SPEED_CHOICES = ["Too slow", "About right", "Too fast"] as const;
-export const EXPERIENCE_CHOICES = ["New to it", "Some", "Fluent"] as const;
+export const EXPERIENCE_CHOICES = ["Beginner", "Intermediate", "Advanced", "Fluent"] as const;
 
 export interface FeedbackAnswers {
   /** Trouble letters, or just NONE. */

@@ -30,7 +30,7 @@ describe("toFormBody", () => {
       slide: "Worked",
       bounce: "Didn't try",
       speed: "About right",
-      experience: "Some",
+      experience: "Intermediate",
       notes: " slow on M ",
     });
     expect([...body]).toEqual([
@@ -39,7 +39,7 @@ describe("toFormBody", () => {
       ["entry.973102069", "Worked"],
       ["entry.1391201748", "Didn't try"],
       ["entry.198617729", "About right"],
-      ["entry.186512009", "Some"],
+      ["entry.186512009", "Intermediate"],
       ["entry.253944935", "slow on M"],
     ]);
   });
